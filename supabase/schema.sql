@@ -133,3 +133,33 @@ drop trigger if exists trg_recalculate_balance on public.transactions;
 create trigger trg_recalculate_balance
 after insert or update or delete on public.transactions
 for each row execute function public.recalculate_customer_balance();
+
+-- ====================================================================
+-- 7. CASHBOOK ENTRIES TABLE (Cash In & Out with Cash vs Online split)
+-- ====================================================================
+
+create table if not exists public.cashbook_entries (
+  id uuid primary key default gen_random_uuid(),
+  user_id uuid not null references auth.users(id) on delete cascade,
+  type text check (type in ('in', 'out')) not null,
+  mode text check (mode in ('cash', 'online')) not null,
+  amount numeric(12, 2) not null check (amount > 0),
+  description text,
+  created_at timestamp with time zone default timezone('utc'::text, now()) not null
+);
+
+create index if not exists idx_cashbook_user_id on public.cashbook_entries(user_id);
+alter table public.cashbook_entries enable row level security;
+
+create policy "Users can view own cashbook"
+  on public.cashbook_entries for select
+  using (auth.uid() = user_id);
+
+create policy "Users can insert own cashbook"
+  on public.cashbook_entries for insert
+  with check (auth.uid() = user_id);
+
+create policy "Users can delete own cashbook"
+  on public.cashbook_entries for delete
+  using (auth.uid() = user_id);
+

@@ -16,7 +16,7 @@ import { useAuth } from '@/context/AuthContext';
 import UghraniLogo from '@/components/ui/UghraniLogo';
 
 export default function AuthScreen() {
-  const { signIn, signUp, loginAsDemo, isConfigured } = useAuth();
+  const { signIn, signUp, isConfigured } = useAuth();
   const [mode, setMode] = useState<'login' | 'register'>('login');
   const [loading, setLoading] = useState(false);
   const [errorMessage, setErrorMessage] = useState('');
@@ -180,14 +180,6 @@ export default function AuthScreen() {
                   {mode === 'login' ? 'ચોપડામાં પ્રવેશ કરો (Login)' : 'નવું ખાતું શરૂ કરો (Register)'}
                 </Text>
               )}
-            </TouchableOpacity>
-
-            {/* Instant Demo Button */}
-            <TouchableOpacity
-              style={styles.demoBtn}
-              onPress={loginAsDemo}>
-              <Ionicons name="sparkles" size={16} color="#78350f" />
-              <Text style={styles.demoBtnText}>ડેમો એકાઉન્ટથી જુઓ (Instant Access)</Text>
             </TouchableOpacity>
           </View>
 

@@ -15,6 +15,7 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
 import { Customer, Transaction } from '@/types/ledger';
 import { useAuth } from '@/context/AuthContext';
+import { supabase } from '@/lib/supabase';
 import UghraniLogo from '@/components/ui/UghraniLogo';
 
 const INITIAL_CUSTOMERS: Customer[] = [
@@ -66,6 +67,43 @@ export default function HomeScreen() {
   const [searchQuery, setSearchQuery] = useState('');
   const [activeFilter, setActiveFilter] = useState<'all' | 'due' | 'settled'>('all');
   const [showProfileModal, setShowProfileModal] = useState(false);
+  const [loading, setLoading] = useState(false);
+
+  const loadCustomers = async () => {
+    if (!user?.id) return;
+    setLoading(true);
+    try {
+      const { data, error } = await supabase
+        .from('customers')
+        .select('*')
+        .eq('user_id', user.id)
+        .order('created_at', { ascending: false });
+
+      if (data && !error && data.length > 0) {
+        const mapped: Customer[] = data.map((d: any) => ({
+          id: d.id,
+          name: d.name,
+          phone: d.phone || '',
+          balance: parseFloat(d.balance) || 0,
+          lastTransactionDate: d.last_transaction_date
+            ? new Date(d.last_transaction_date).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
+            : 'Today',
+          avatarColor: d.avatar_color || '#991b1b',
+        }));
+        setCustomers(mapped);
+      } else if (data && data.length === 0) {
+        setCustomers([]);
+      }
+    } catch (e) {
+      console.log('Error loading customers:', e);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  React.useEffect(() => {
+    loadCustomers();
+  }, [user?.id]);
 
   // Customer Add Modal
   const [showAddCustomerModal, setShowAddCustomerModal] = useState(false);
@@ -100,49 +138,91 @@ export default function HomeScreen() {
     return true;
   });
 
-  const handleAddCustomer = () => {
+  const handleAddCustomer = async () => {
     if (!newCustomerName.trim()) return;
     const initialBal = parseFloat(newCustomerBalance) || 0;
     const colors = ['#991b1b', '#d97706', '#059669', '#b45309', '#7f1d1d', '#047857'];
     const randomColor = colors[Math.floor(Math.random() * colors.length)];
 
-    const newCustomer: Customer = {
-      id: Date.now().toString(),
-      name: newCustomerName.trim(),
-      phone: newCustomerPhone.trim() || 'Not provided',
-      balance: initialBal,
-      lastTransactionDate: 'Just now',
-      avatarColor: randomColor,
-    };
+    if (user?.id) {
+      try {
+        const { data, error } = await supabase
+          .from('customers')
+          .insert({
+            user_id: user.id,
+            name: newCustomerName.trim(),
+            phone: newCustomerPhone.trim(),
+            balance: initialBal,
+            avatar_color: randomColor,
+          })
+          .select()
+          .single();
 
-    setCustomers([newCustomer, ...customers]);
+        if (data && !error) {
+          const newCust: Customer = {
+            id: data.id,
+            name: data.name,
+            phone: data.phone || 'Not provided',
+            balance: parseFloat(data.balance) || 0,
+            lastTransactionDate: 'Just now',
+            avatarColor: data.avatar_color || randomColor,
+          };
+          setCustomers([newCust, ...customers]);
+        }
+      } catch (err) {
+        console.error(err);
+      }
+    } else {
+      const newCustomer: Customer = {
+        id: Date.now().toString(),
+        name: newCustomerName.trim(),
+        phone: newCustomerPhone.trim() || 'Not provided',
+        balance: initialBal,
+        lastTransactionDate: 'Just now',
+        avatarColor: randomColor,
+      };
+      setCustomers([newCustomer, ...customers]);
+    }
+
     setNewCustomerName('');
     setNewCustomerPhone('');
     setNewCustomerBalance('');
     setShowAddCustomerModal(false);
   };
 
-  const handleRecordTransaction = () => {
+  const handleRecordTransaction = async () => {
     if (!selectedCustomer) return;
     const amountNum = parseFloat(txAmount);
     if (isNaN(amountNum) || amountNum <= 0) return;
 
-    // credit_given (Udhar) increases what customer owes (+balance)
-    // payment_received (Jama) decreases what customer owes (-balance)
-    const balanceChange = txType === 'credit_given' ? amountNum : -amountNum;
-
-    setCustomers((prev) =>
-      prev.map((c) => {
-        if (c.id === selectedCustomer.id) {
-          return {
-            ...c,
-            balance: c.balance + balanceChange,
-            lastTransactionDate: 'Just now',
-          };
-        }
-        return c;
-      })
-    );
+    if (user?.id) {
+      try {
+        await supabase.from('transactions').insert({
+          user_id: user.id,
+          customer_id: selectedCustomer.id,
+          type: txType,
+          amount: amountNum,
+          note: txNote.trim(),
+        });
+        await loadCustomers();
+      } catch (err) {
+        console.error(err);
+      }
+    } else {
+      const balanceChange = txType === 'credit_given' ? amountNum : -amountNum;
+      setCustomers((prev) =>
+        prev.map((c) => {
+          if (c.id === selectedCustomer.id) {
+            return {
+              ...c,
+              balance: c.balance + balanceChange,
+              lastTransactionDate: 'Just now',
+            };
+          }
+          return c;
+        })
+      );
+    }
 
     setTxAmount('');
     setTxNote('');

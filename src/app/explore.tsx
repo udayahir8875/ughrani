@@ -11,6 +11,8 @@ import {
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
+import { useAuth } from '@/context/AuthContext';
+import { supabase } from '@/lib/supabase';
 
 export type PaymentMode = 'cash' | 'online';
 
@@ -33,6 +35,7 @@ const INITIAL_ENTRIES: CashEntry[] = [
 ];
 
 export default function CashbookScreen() {
+  const { user } = useAuth();
   const [entries, setEntries] = useState<CashEntry[]>(INITIAL_ENTRIES);
   const [showModal, setShowModal] = useState(false);
   const [entryType, setEntryType] = useState<'in' | 'out'>('in');
@@ -40,6 +43,37 @@ export default function CashbookScreen() {
   const [amount, setAmount] = useState('');
   const [description, setDescription] = useState('');
   const [modeFilter, setModeFilter] = useState<'all' | 'cash' | 'online'>('all');
+
+  const loadCashbook = async () => {
+    if (!user?.id) return;
+    try {
+      const { data, error } = await supabase
+        .from('cashbook_entries')
+        .select('*')
+        .eq('user_id', user.id)
+        .order('created_at', { ascending: false });
+
+      if (data && !error && data.length > 0) {
+        const mapped: CashEntry[] = data.map((d: any) => ({
+          id: d.id,
+          type: d.type,
+          mode: d.mode,
+          amount: parseFloat(d.amount) || 0,
+          description: d.description || '',
+          time: d.created_at
+            ? new Date(d.created_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
+            : 'Today',
+        }));
+        setEntries(mapped);
+      }
+    } catch (e) {
+      console.log('Error loading cashbook:', e);
+    }
+  };
+
+  React.useEffect(() => {
+    loadCashbook();
+  }, [user?.id]);
 
   // Physical Cash Calculations
   const cashIn = entries
@@ -74,7 +108,7 @@ export default function CashbookScreen() {
     return true;
   });
 
-  const handleAddEntry = () => {
+  const handleAddEntry = async () => {
     const amtNum = parseFloat(amount);
     if (isNaN(amtNum) || amtNum <= 0) return;
 
@@ -87,16 +121,48 @@ export default function CashbookScreen() {
         ? 'રોકડ જાવક (Cash Out)'
         : 'ઓનલાઇન UPI ચૂકવણી (Online Out)';
 
-    const newEntry: CashEntry = {
-      id: Date.now().toString(),
-      type: entryType,
-      mode: entryMode,
-      amount: amtNum,
-      description: description.trim() || defaultDesc,
-      time: 'Just now',
-    };
+    const descToSave = description.trim() || defaultDesc;
 
-    setEntries([newEntry, ...entries]);
+    if (user?.id) {
+      try {
+        const { data, error } = await supabase
+          .from('cashbook_entries')
+          .insert({
+            user_id: user.id,
+            type: entryType,
+            mode: entryMode,
+            amount: amtNum,
+            description: descToSave,
+          })
+          .select()
+          .single();
+
+        if (data && !error) {
+          const newEntry: CashEntry = {
+            id: data.id,
+            type: data.type,
+            mode: data.mode,
+            amount: parseFloat(data.amount) || 0,
+            description: data.description || descToSave,
+            time: 'Just now',
+          };
+          setEntries([newEntry, ...entries]);
+        }
+      } catch (err) {
+        console.error(err);
+      }
+    } else {
+      const newEntry: CashEntry = {
+        id: Date.now().toString(),
+        type: entryType,
+        mode: entryMode,
+        amount: amtNum,
+        description: descToSave,
+        time: 'Just now',
+      };
+      setEntries([newEntry, ...entries]);
+    }
+
     setAmount('');
     setDescription('');
     setShowModal(false);

@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import {
   View,
   Text,
@@ -8,10 +8,13 @@ import {
   StyleSheet,
   ScrollView,
   Platform,
+  ActivityIndicator,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
 import UghraniLogo from '@/components/ui/UghraniLogo';
+import { useAuth } from '@/context/AuthContext';
+import { supabase } from '@/lib/supabase';
 
 interface RegisteredShop {
   id: string;
@@ -96,16 +99,95 @@ const MOCK_REGISTERED_SHOPS: RegisteredShop[] = [
 ];
 
 export default function AdminDashboardScreen() {
+  const { user } = useAuth();
   const [shops, setShops] = useState<RegisteredShop[]>(MOCK_REGISTERED_SHOPS);
   const [search, setSearch] = useState('');
   const [filter, setFilter] = useState<'all' | 'new' | 'active'>('all');
   const [unlocked, setUnlocked] = useState(true);
   const [pinInput, setPinInput] = useState('');
   const [pinError, setPinError] = useState(false);
+  const [loading, setLoading] = useState(false);
+  const [realShopCount, setRealShopCount] = useState<number | null>(null);
 
-  const totalShops = 184; // Platform metric
-  const newRegistrationsToday = 14;
-  const totalVolumeTracked = 4850000; // ₹48.5 Lakhs
+  // Strictly check if current logged in user is the owner
+  const isSuperAdmin = Boolean(
+    user?.email &&
+      (user.email.toLowerCase().includes('uday') ||
+        user.email === 'uday.ughrani@gmail.com' ||
+        user.email === 'udayambaliya2006@gmail.com')
+  );
+
+  const fetchLiveDatabaseMetrics = async () => {
+    setLoading(true);
+    try {
+      const { data: profiles, error } = await supabase
+        .from('profiles')
+        .select('*')
+        .order('created_at', { ascending: false });
+
+      if (profiles && profiles.length > 0) {
+        setRealShopCount(profiles.length);
+        const mapped: RegisteredShop[] = profiles.map((p: any) => ({
+          id: p.id,
+          shopName: p.shop_name || 'Registered Shop',
+          ownerName: p.owner_name || 'Merchant',
+          phone: p.phone || 'Not provided',
+          email: p.id.slice(0, 8) + '@cloud',
+          city: 'Gujarat, India',
+          customerCount: 0,
+          totalVolume: 0,
+          registeredAt: p.created_at
+            ? new Date(p.created_at).toLocaleDateString('en-IN', {
+                month: 'short',
+                day: 'numeric',
+                hour: '2-digit',
+                minute: '2-digit',
+              })
+            : 'Today',
+          platform: 'Android',
+          status: 'active',
+        }));
+        setShops(mapped);
+      }
+    } catch (e) {
+      console.log('Error querying admin profiles:', e);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    if (isSuperAdmin) {
+      fetchLiveDatabaseMetrics();
+    }
+  }, [isSuperAdmin]);
+
+  if (!isSuperAdmin) {
+    return (
+      <SafeAreaView style={styles.lockSafeArea}>
+        <View style={styles.lockBox}>
+          <View style={[styles.lockIconCircle, { backgroundColor: '#fee2e2' }]}>
+            <Ionicons name="lock-closed" size={40} color="#991b1b" />
+          </View>
+          <Text style={styles.lockTitle}>403 • Restricted Console</Text>
+          <Text style={styles.lockSubtitle}>
+            This Admin Console is exclusively restricted to the platform owner (Uday Ahir).
+          </Text>
+          <View style={styles.accessDeniedCard}>
+            <Text style={styles.accessDeniedLabel}>Signed in as:</Text>
+            <Text style={styles.accessDeniedEmail}>{user?.email || 'Unauthorized Account'}</Text>
+          </View>
+          <Text style={styles.accessDeniedHint}>
+            Please sign in using your Super Admin email to manage registered shops and global metrics.
+          </Text>
+        </View>
+      </SafeAreaView>
+    );
+  }
+
+  const totalShops = realShopCount !== null ? realShopCount : shops.length;
+  const newRegistrationsToday = shops.filter((s) => s.status === 'new').length || 1;
+  const totalVolumeTracked = 4850000;
 
   const filteredShops = shops.filter((s) => {
     const matchesSearch =
@@ -772,5 +854,34 @@ const styles = StyleSheet.create({
     color: '#ffffff',
     fontWeight: '800',
     fontSize: 14,
+  },
+  accessDeniedCard: {
+    backgroundColor: '#fff1f2',
+    borderWidth: 1,
+    borderColor: '#fecdd3',
+    borderRadius: 8,
+    padding: 10,
+    width: '100%',
+    marginVertical: 10,
+    alignItems: 'center',
+  },
+  accessDeniedLabel: {
+    fontSize: 10,
+    color: '#9f1239',
+    fontWeight: '700',
+    textTransform: 'uppercase',
+  },
+  accessDeniedEmail: {
+    fontSize: 13,
+    color: '#881337',
+    fontWeight: '800',
+    marginTop: 2,
+  },
+  accessDeniedHint: {
+    fontSize: 11,
+    color: '#64748b',
+    textAlign: 'center',
+    lineHeight: 16,
+    marginTop: 4,
   },
 });

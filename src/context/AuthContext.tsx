@@ -15,32 +15,15 @@ interface AuthContextType {
     phone: string;
   }) => Promise<{ error?: string }>;
   signOut: () => Promise<void>;
-  loginAsDemo: () => void;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
-
-const DEMO_USER: UserProfile = {
-  id: 'demo-shop-123',
-  email: 'shopkeeper@ughrani.com',
-  shopName: 'Shree Ughrani Kirana Store',
-  ownerName: 'Uday Patel',
-  phone: '9876543210',
-  createdAt: new Date().toISOString(),
-};
 
 export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [user, setUser] = useState<UserProfile | null>(null);
   const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
-    if (!isSupabaseConfigured) {
-      // Default to demo user if not logged out
-      setUser(DEMO_USER);
-      setIsLoading(false);
-      return;
-    }
-
     // Check active Supabase session
     supabase.auth.getSession().then(({ data: { session } }) => {
       if (session?.user) {
@@ -48,6 +31,8 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       } else {
         setIsLoading(false);
       }
+    }).catch(() => {
+      setIsLoading(false);
     });
 
     const { data: authListener } = supabase.auth.onAuthStateChange(
@@ -72,7 +57,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         .from('profiles')
         .select('*')
         .eq('id', userId)
-        .single();
+        .maybeSingle();
 
       if (data && !error) {
         setUser({
@@ -84,12 +69,11 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
           createdAt: data.created_at || new Date().toISOString(),
         });
       } else {
-        // Fallback profile if profile row is pending creation
         setUser({
           id: userId,
           email,
-          shopName: 'My Shop',
-          ownerName: 'Shopkeeper',
+          shopName: 'Shree Ughrani Kirana Store',
+          ownerName: 'Uday Ahir',
           phone: '',
           createdAt: new Date().toISOString(),
         });
@@ -98,8 +82,8 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       setUser({
         id: userId,
         email,
-        shopName: 'My Shop',
-        ownerName: 'Shopkeeper',
+        shopName: 'Shree Ughrani Kirana Store',
+        ownerName: 'Uday Ahir',
         phone: '',
         createdAt: new Date().toISOString(),
       });
@@ -109,14 +93,9 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   };
 
   const signIn = async (email: string, password: string) => {
-    if (!isSupabaseConfigured) {
-      setUser(DEMO_USER);
-      return {};
-    }
-
     try {
       const { error } = await supabase.auth.signInWithPassword({
-        email,
+        email: email.trim(),
         password,
       });
       if (error) return { error: error.message };
@@ -139,27 +118,15 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     ownerName: string;
     phone: string;
   }) => {
-    if (!isSupabaseConfigured) {
-      setUser({
-        id: Date.now().toString(),
-        email,
-        shopName,
-        ownerName,
-        phone,
-        createdAt: new Date().toISOString(),
-      });
-      return {};
-    }
-
     try {
       const { data, error } = await supabase.auth.signUp({
-        email,
+        email: email.trim(),
         password,
         options: {
           data: {
-            shop_name: shopName,
-            owner_name: ownerName,
-            phone: phone,
+            shop_name: shopName.trim(),
+            owner_name: ownerName.trim(),
+            phone: phone.trim(),
           },
         },
       });
@@ -167,12 +134,11 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       if (error) return { error: error.message };
 
       if (data.user) {
-        // Create profile row in profiles table
         await supabase.from('profiles').upsert({
           id: data.user.id,
-          shop_name: shopName,
-          owner_name: ownerName,
-          phone: phone,
+          shop_name: shopName.trim(),
+          owner_name: ownerName.trim(),
+          phone: phone.trim(),
           created_at: new Date().toISOString(),
         });
       }
@@ -184,14 +150,8 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   };
 
   const signOut = async () => {
-    if (isSupabaseConfigured) {
-      await supabase.auth.signOut();
-    }
+    await supabase.auth.signOut();
     setUser(null);
-  };
-
-  const loginAsDemo = () => {
-    setUser(DEMO_USER);
   };
 
   return (
@@ -203,7 +163,6 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         signIn,
         signUp,
         signOut,
-        loginAsDemo,
       }}>
       {children}
     </AuthContext.Provider>

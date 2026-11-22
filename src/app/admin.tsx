@@ -30,77 +30,9 @@ interface RegisteredShop {
   status: 'active' | 'new';
 }
 
-const MOCK_REGISTERED_SHOPS: RegisteredShop[] = [
-  {
-    id: 'shop-1',
-    shopName: 'Shree Ambika Provision Store',
-    ownerName: 'Uday Ahir',
-    phone: '9825123456',
-    email: 'uday.ambika@gmail.com',
-    city: 'Rajkot, Gujarat',
-    customerCount: 142,
-    totalVolume: 184500,
-    registeredAt: 'Today, 06:15 PM',
-    platform: 'Android',
-    status: 'new',
-  },
-  {
-    id: 'shop-2',
-    shopName: 'Radha Krishna Kirana & General',
-    ownerName: 'Ramesh Patel',
-    phone: '9876543210',
-    email: 'ramesh.kirana@gmail.com',
-    city: 'Ahmedabad, Gujarat',
-    customerCount: 89,
-    totalVolume: 96200,
-    registeredAt: 'Today, 02:45 PM',
-    platform: 'Web',
-    status: 'new',
-  },
-  {
-    id: 'shop-3',
-    shopName: 'Gokul Dairy & Sweet Mart',
-    ownerName: 'Bhavesh Ahir',
-    phone: '9426098765',
-    email: 'gokuldairy.surat@yahoo.com',
-    city: 'Surat, Gujarat',
-    customerCount: 215,
-    totalVolume: 342000,
-    registeredAt: 'Yesterday',
-    platform: 'Android',
-    status: 'active',
-  },
-  {
-    id: 'shop-4',
-    shopName: 'Sardar Hardware & Electricals',
-    ownerName: 'Hasmukhbhai Shah',
-    phone: '9909012345',
-    email: 'sardarhardware@gmail.com',
-    city: 'Vadodara, Gujarat',
-    customerCount: 64,
-    totalVolume: 210000,
-    registeredAt: '20 Nov 2026',
-    platform: 'Web',
-    status: 'active',
-  },
-  {
-    id: 'shop-5',
-    shopName: 'Balaji Stationery & Xerox',
-    ownerName: 'Manoj Dave',
-    phone: '9724567890',
-    email: 'balajistationery@gmail.com',
-    city: 'Bhavnagar, Gujarat',
-    customerCount: 48,
-    totalVolume: 38500,
-    registeredAt: '18 Nov 2026',
-    platform: 'iOS',
-    status: 'active',
-  },
-];
-
 export default function AdminDashboardScreen() {
   const { user } = useAuth();
-  const [shops, setShops] = useState<RegisteredShop[]>(MOCK_REGISTERED_SHOPS);
+  const [shops, setShops] = useState<RegisteredShop[]>([]);
   const [search, setSearch] = useState('');
   const [filter, setFilter] = useState<'all' | 'new' | 'active'>('all');
   const [unlocked, setUnlocked] = useState(true);
@@ -148,6 +80,23 @@ export default function AdminDashboardScreen() {
           status: 'active',
         }));
         setShops(mapped);
+      } else {
+        setRealShopCount(1);
+        setShops([
+          {
+            id: user?.id || 'master-1',
+            shopName: user?.shopName || 'Shree Ughrani Kirana Store',
+            ownerName: user?.ownerName || 'Uday Ahir',
+            phone: user?.phone || '9825123456',
+            email: user?.email || 'uday.ughrani@gmail.com',
+            city: 'Gujarat, India',
+            customerCount: 0,
+            totalVolume: 0,
+            registeredAt: 'Today',
+            platform: 'Android',
+            status: 'active',
+          },
+        ]);
       }
     } catch (e) {
       console.log('Error querying admin profiles:', e);
@@ -186,8 +135,7 @@ export default function AdminDashboardScreen() {
   }
 
   const totalShops = realShopCount !== null ? realShopCount : shops.length;
-  const newRegistrationsToday = shops.filter((s) => s.status === 'new').length || 1;
-  const totalVolumeTracked = 4850000;
+  const newRegistrationsToday = shops.filter((s) => s.status === 'new').length;
 
   const filteredShops = shops.filter((s) => {
     const matchesSearch =

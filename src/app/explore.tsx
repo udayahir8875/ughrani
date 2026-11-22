@@ -25,18 +25,9 @@ interface CashEntry {
   time: string;
 }
 
-const INITIAL_ENTRIES: CashEntry[] = [
-  { id: '1', type: 'in', mode: 'online', amount: 1450, description: 'Ramesh Patel (GPay UPI)', time: '11:30 AM' },
-  { id: '2', type: 'in', mode: 'cash', amount: 500, description: 'Counter Cash Sale (રોકડ ગલ્લો)', time: '12:15 PM' },
-  { id: '3', type: 'out', mode: 'cash', amount: 350, description: 'Milk Delivery (દૂધવાળાને રોકડા)', time: '01:00 PM' },
-  { id: '4', type: 'in', mode: 'online', amount: 800, description: 'Jayeshbhai (PhonePe QR)', time: '02:40 PM' },
-  { id: '5', type: 'out', mode: 'online', amount: 1200, description: 'Wholesale Supplier (UPI Transfer)', time: '03:15 PM' },
-  { id: '6', type: 'out', mode: 'cash', amount: 120, description: 'Shop Tea & Snacks (ચા-નાસ્તો)', time: '04:10 PM' },
-];
-
 export default function CashbookScreen() {
   const { user } = useAuth();
-  const [entries, setEntries] = useState<CashEntry[]>(INITIAL_ENTRIES);
+  const [entries, setEntries] = useState<CashEntry[]>([]);
   const [showModal, setShowModal] = useState(false);
   const [entryType, setEntryType] = useState<'in' | 'out'>('in');
   const [entryMode, setEntryMode] = useState<PaymentMode>('cash');
@@ -307,60 +298,72 @@ export default function CashbookScreen() {
 
         {/* Transactions Feed */}
         <View style={styles.entriesList}>
-          {filteredEntries.map((item) => {
-            const isIn = item.type === 'in';
-            const isCash = item.mode === 'cash';
-
-            return (
-              <View key={item.id} style={styles.entryCard}>
-                <View
-                  style={[
-                    styles.entryIconBox,
-                    { backgroundColor: isIn ? '#dcfce7' : '#fee2e2' },
-                  ]}>
-                  <Ionicons
-                    name={isIn ? 'arrow-down' : 'arrow-up'}
-                    size={18}
-                    color={isIn ? '#059669' : '#991b1b'}
-                  />
-                </View>
-
-                <View style={styles.entryDetails}>
-                  <Text style={styles.entryDesc}>{item.description}</Text>
-                  <View style={styles.entryMetaRow}>
-                    {/* Payment Mode Tag: Cash vs Online */}
-                    <View
-                      style={[
-                        styles.modeBadge,
-                        isCash ? styles.modeBadgeCash : styles.modeBadgeOnline,
-                      ]}>
-                      <Ionicons
-                        name={isCash ? 'cash-outline' : 'qr-code-outline'}
-                        size={11}
-                        color={isCash ? '#92400e' : '#1e40af'}
-                      />
-                      <Text
-                        style={[
-                          styles.modeBadgeText,
-                          isCash ? styles.modeBadgeTextCash : styles.modeBadgeTextOnline,
-                        ]}>
-                        {isCash ? 'રોકડ (Cash)' : 'ઓનલાઇન (UPI)'}
-                      </Text>
-                    </View>
-                    <Text style={styles.entryTime}>• {item.time}</Text>
-                  </View>
-                </View>
-
-                <Text
-                  style={[
-                    styles.entryAmount,
-                    { color: isIn ? '#059669' : '#991b1b' },
-                  ]}>
-                  {isIn ? '+' : '-'} ₹{item.amount.toLocaleString('en-IN')}
-                </Text>
+          {filteredEntries.length === 0 ? (
+            <View style={styles.emptyContainer}>
+              <View style={styles.emptyIconBox}>
+                <Ionicons name="wallet-outline" size={36} color="#d97706" />
               </View>
-            );
-          })}
+              <Text style={styles.emptyTitle}>આજનો રોકડમેળ ખાલી છે 💵</Text>
+              <Text style={styles.emptyText}>
+                આજે હજુ સુધી કોઈ રોકડ કે ઓનલાઇન આવક/જાવક નોંધાયેલ નથી. '+ આવક' અથવા '- જાવક' બટનથી પ્રથમ વ્યવહાર ઉમેરો.
+              </Text>
+            </View>
+          ) : (
+            filteredEntries.map((item) => {
+              const isIn = item.type === 'in';
+              const isCash = item.mode === 'cash';
+
+              return (
+                <View key={item.id} style={styles.entryCard}>
+                  <View
+                    style={[
+                      styles.entryIconBox,
+                      { backgroundColor: isIn ? '#dcfce7' : '#fee2e2' },
+                    ]}>
+                    <Ionicons
+                      name={isIn ? 'arrow-down' : 'arrow-up'}
+                      size={18}
+                      color={isIn ? '#059669' : '#991b1b'}
+                    />
+                  </View>
+
+                  <View style={styles.entryDetails}>
+                    <Text style={styles.entryDesc}>{item.description}</Text>
+                    <View style={styles.entryMetaRow}>
+                      {/* Payment Mode Tag: Cash vs Online */}
+                      <View
+                        style={[
+                          styles.modeBadge,
+                          isCash ? styles.modeBadgeCash : styles.modeBadgeOnline,
+                        ]}>
+                        <Ionicons
+                          name={isCash ? 'cash-outline' : 'qr-code-outline'}
+                          size={11}
+                          color={isCash ? '#92400e' : '#1e40af'}
+                        />
+                        <Text
+                          style={[
+                            styles.modeBadgeText,
+                            isCash ? styles.modeBadgeTextCash : styles.modeBadgeTextOnline,
+                          ]}>
+                          {isCash ? 'રોકડ (Cash)' : 'ઓનલાઇન (UPI)'}
+                        </Text>
+                      </View>
+                      <Text style={styles.entryTime}>• {item.time}</Text>
+                    </View>
+                  </View>
+
+                  <Text
+                    style={[
+                      styles.entryAmount,
+                      { color: isIn ? '#059669' : '#991b1b' },
+                    ]}>
+                    {isIn ? '+' : '-'} ₹{item.amount.toLocaleString('en-IN')}
+                  </Text>
+                </View>
+              );
+            })
+          )}
         </View>
       </ScrollView>
 
@@ -983,5 +986,37 @@ const styles = StyleSheet.create({
     color: '#ffffff',
     fontSize: 14,
     fontWeight: '800',
+  },
+  emptyContainer: {
+    alignItems: 'center',
+    justifyContent: 'center',
+    paddingVertical: 40,
+    paddingHorizontal: 20,
+    backgroundColor: '#ffffff',
+    borderRadius: 14,
+    borderWidth: 1.5,
+    borderColor: '#fde68a',
+    marginTop: 6,
+  },
+  emptyIconBox: {
+    width: 60,
+    height: 60,
+    borderRadius: 30,
+    backgroundColor: '#fef3c7',
+    justifyContent: 'center',
+    alignItems: 'center',
+    marginBottom: 10,
+  },
+  emptyTitle: {
+    fontSize: 16,
+    fontWeight: '900',
+    color: '#78350f',
+  },
+  emptyText: {
+    fontSize: 12,
+    color: '#854d0e',
+    textAlign: 'center',
+    marginTop: 4,
+    lineHeight: 18,
   },
 });

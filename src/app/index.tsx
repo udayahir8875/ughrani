@@ -18,52 +18,9 @@ import { useAuth } from '@/context/AuthContext';
 import { supabase } from '@/lib/supabase';
 import UghraniLogo from '@/components/ui/UghraniLogo';
 
-const INITIAL_CUSTOMERS: Customer[] = [
-  {
-    id: '1',
-    name: 'Ramesh Patel (કાકા)',
-    phone: '9876543210',
-    balance: 1450,
-    lastTransactionDate: 'Today, 11:30 AM',
-    avatarColor: '#991b1b',
-  },
-  {
-    id: '2',
-    name: 'Haresh Ahir',
-    phone: '9825123456',
-    balance: 2800,
-    lastTransactionDate: 'Yesterday',
-    avatarColor: '#d97706',
-  },
-  {
-    id: '3',
-    name: 'Pooja General Store',
-    phone: '9898765432',
-    balance: -600, // You owe them
-    lastTransactionDate: '20 Nov',
-    avatarColor: '#c2410c',
-  },
-  {
-    id: '4',
-    name: 'Ketan Shah',
-    phone: '9426011223',
-    balance: 0,
-    lastTransactionDate: '18 Nov',
-    avatarColor: '#059669',
-  },
-  {
-    id: '5',
-    name: 'Jayeshbhai Dairy',
-    phone: '9909876543',
-    balance: 420,
-    lastTransactionDate: '16 Nov',
-    avatarColor: '#7f1d1d',
-  },
-];
-
 export default function HomeScreen() {
   const { user, signOut, isConfigured } = useAuth();
-  const [customers, setCustomers] = useState<Customer[]>(INITIAL_CUSTOMERS);
+  const [customers, setCustomers] = useState<Customer[]>([]);
   const [searchQuery, setSearchQuery] = useState('');
   const [activeFilter, setActiveFilter] = useState<'all' | 'due' | 'settled'>('all');
   const [showProfileModal, setShowProfileModal] = useState(false);
@@ -253,9 +210,9 @@ export default function HomeScreen() {
             <Text style={styles.headerSubtitle} numberOfLines={1}>
               {user?.shopName || 'Shree Kirana Store'} 🏪
             </Text>
-            <View style={[styles.statusDot, isConfigured ? styles.dotGreen : styles.dotOrange]} />
+            <View style={[styles.statusDot, styles.dotGreen]} />
             <Text style={styles.syncStatusText}>
-              {isConfigured ? 'Cloud Live' : 'Demo Mode'}
+              100% Cloud Synced
             </Text>
           </View>
         </TouchableOpacity>
@@ -626,7 +583,7 @@ export default function HomeScreen() {
               <View style={styles.profileRow}>
                 <Ionicons name="mail" size={18} color="#991b1b" />
                 <Text style={styles.profileLabel}>એકાઉન્ટ:</Text>
-                <Text style={styles.profileValue}>{user?.email || 'demo@ughrani.com'}</Text>
+                <Text style={styles.profileValue}>{user?.email || 'uday.ughrani@gmail.com'}</Text>
               </View>
             </View>
 

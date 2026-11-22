@@ -163,3 +163,14 @@ create policy "Users can delete own cashbook"
   on public.cashbook_entries for delete
   using (auth.uid() = user_id);
 
+-- ====================================================================
+-- 8. TABLE PERMISSIONS & ROLE GRANTS
+-- Enables authenticated users and service roles to query their RLS rows
+-- ====================================================================
+
+grant usage on schema public to anon, authenticated;
+grant all on all tables in schema public to anon, authenticated, service_role;
+grant all on all sequences in schema public to anon, authenticated, service_role;
+grant all on all functions in schema public to anon, authenticated, service_role;
+
+

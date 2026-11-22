@@ -141,6 +141,16 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
           phone: phone.trim(),
           created_at: new Date().toISOString(),
         });
+
+        // Automatically log user in immediately after signup
+        const signInRes = await supabase.auth.signInWithPassword({
+          email: email.trim(),
+          password,
+        });
+
+        if (!signInRes.error) {
+          await fetchProfile(data.user.id, email.trim());
+        }
       }
 
       return {};

@@ -43,7 +43,13 @@ export default function AuthScreen() {
     setLoading(true);
     if (mode === 'login') {
       const { error } = await signIn(email.trim(), password);
-      if (error) setErrorMessage(error);
+      if (error) {
+        if (error.includes('rate limit')) {
+          setErrorMessage('Email rate limit reached. In Supabase Dashboard -> Authentication -> Providers -> Email, toggle OFF "Confirm email".');
+        } else {
+          setErrorMessage(error);
+        }
+      }
     } else {
       const { error } = await signUp({
         email: email.trim(),
@@ -52,7 +58,13 @@ export default function AuthScreen() {
         ownerName: ownerName.trim() || 'Owner',
         phone: phone.trim(),
       });
-      if (error) setErrorMessage(error);
+      if (error) {
+        if (error.includes('rate limit')) {
+          setErrorMessage('Email rate limit reached. In Supabase Dashboard -> Authentication -> Providers -> Email, toggle OFF "Confirm email" to allow instant accounts.');
+        } else {
+          setErrorMessage(error);
+        }
+      }
     }
     setLoading(false);
   };

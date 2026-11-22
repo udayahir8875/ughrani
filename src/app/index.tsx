@@ -15,6 +15,7 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
 import { Customer, Transaction } from '@/types/ledger';
 import { useAuth } from '@/context/AuthContext';
+import UghraniLogo from '@/components/ui/UghraniLogo';
 
 const INITIAL_CUSTOMERS: Customer[] = [
   {
@@ -23,7 +24,7 @@ const INITIAL_CUSTOMERS: Customer[] = [
     phone: '9876543210',
     balance: 1450,
     lastTransactionDate: 'Today, 11:30 AM',
-    avatarColor: '#2563eb',
+    avatarColor: '#991b1b',
   },
   {
     id: '2',
@@ -31,7 +32,7 @@ const INITIAL_CUSTOMERS: Customer[] = [
     phone: '9825123456',
     balance: 2800,
     lastTransactionDate: 'Yesterday',
-    avatarColor: '#7c3aed',
+    avatarColor: '#d97706',
   },
   {
     id: '3',
@@ -39,7 +40,7 @@ const INITIAL_CUSTOMERS: Customer[] = [
     phone: '9898765432',
     balance: -600, // You owe them
     lastTransactionDate: '20 Nov',
-    avatarColor: '#ea580c',
+    avatarColor: '#c2410c',
   },
   {
     id: '4',
@@ -55,7 +56,7 @@ const INITIAL_CUSTOMERS: Customer[] = [
     phone: '9909876543',
     balance: 420,
     lastTransactionDate: '16 Nov',
-    avatarColor: '#db2777',
+    avatarColor: '#7f1d1d',
   },
 ];
 
@@ -102,7 +103,7 @@ export default function HomeScreen() {
   const handleAddCustomer = () => {
     if (!newCustomerName.trim()) return;
     const initialBal = parseFloat(newCustomerBalance) || 0;
-    const colors = ['#2563eb', '#7c3aed', '#059669', '#ea580c', '#db2777', '#0891b2'];
+    const colors = ['#991b1b', '#d97706', '#059669', '#b45309', '#7f1d1d', '#047857'];
     const randomColor = colors[Math.floor(Math.random() * colors.length)];
 
     const newCustomer: Customer = {
@@ -151,7 +152,7 @@ export default function HomeScreen() {
   const sendWhatsAppReminder = (customer: Customer) => {
     if (customer.balance <= 0) return;
     const message = encodeURIComponent(
-      `નમસ્તે ${customer.name},\nતમારી દુકાનની ઉઘરાણી ₹${customer.balance} બાકી છે. અનુકૂળતા મુજબ જમા કરાવી આપશો.\nઆભાર - Ughrani App`
+      `નમસ્તે ${customer.name} જી,\n${user?.shopName || 'અમારી દુકાન'} માંથી તમારી ઉઘરાણી ₹${customer.balance} બાકી છે. અનુકૂળતા મુજબ જમા કરાવી આપશો.\nઆભાર - Ughrani Khata`
     );
     const url = `https://wa.me/91${customer.phone.replace(/[^0-9]/g, '')}?text=${message}`;
     Linking.openURL(url).catch(() => {
@@ -161,21 +162,21 @@ export default function HomeScreen() {
 
   return (
     <SafeAreaView style={styles.safeArea}>
-      {/* App Header */}
+      {/* Traditional Indian Merchant Header Banner */}
       <View style={styles.header}>
         <TouchableOpacity
           style={styles.headerShopInfo}
           activeOpacity={0.7}
           onPress={() => setShowProfileModal(true)}>
-          <View style={styles.headerTitleRow}>
-            <Text style={styles.headerTitle}>Ughrani</Text>
-            <Text style={styles.headerBadge}>ઉઘરાણી</Text>
-          </View>
+          <UghraniLogo size="sm" showSubtitle={false} />
           <View style={styles.headerShopRow}>
             <Text style={styles.headerSubtitle} numberOfLines={1}>
               {user?.shopName || 'Shree Kirana Store'} 🏪
             </Text>
             <View style={[styles.statusDot, isConfigured ? styles.dotGreen : styles.dotOrange]} />
+            <Text style={styles.syncStatusText}>
+              {isConfigured ? 'Cloud Live' : 'Demo Mode'}
+            </Text>
           </View>
         </TouchableOpacity>
 
@@ -183,49 +184,65 @@ export default function HomeScreen() {
           <TouchableOpacity
             style={styles.profileBtnHeader}
             onPress={() => setShowProfileModal(true)}>
-            <Ionicons name="storefront-outline" size={18} color="#2563eb" />
+            <Ionicons name="storefront" size={17} color="#78350f" />
           </TouchableOpacity>
           <TouchableOpacity
             style={styles.addBtnHeader}
             onPress={() => setShowAddCustomerModal(true)}>
-            <Ionicons name="person-add" size={18} color="#fff" />
-            <Text style={styles.addBtnText}>Add</Text>
+            <Ionicons name="person-add" size={16} color="#fff" />
+            <Text style={styles.addBtnText}>+ ગ્રાહક</Text>
           </TouchableOpacity>
         </View>
       </View>
 
-      {/* Summary Cards */}
+      {/* Traditional Bahi-Khata Financial Dues Summary Cards */}
       <View style={styles.summaryContainer}>
+        {/* You'll Get Card (ઉઘરાણી) */}
         <View style={[styles.summaryCard, styles.getCard]}>
-          <Text style={styles.summaryLabel}>YOU'LL GET (ઉઘરાણી)</Text>
-          <Text style={[styles.summaryAmount, { color: '#16a34a' }]}>
+          <View style={styles.cardHeaderSmall}>
+            <Text style={styles.summaryLabel}>YOU'LL GET • ઉઘરાણી</Text>
+            <View style={styles.sealBadgeGreen}>
+              <Text style={styles.sealBadgeText}>આવક</Text>
+            </View>
+          </View>
+          <Text style={[styles.summaryAmount, { color: '#047857' }]}>
             ₹{totalYoullGet.toLocaleString('en-IN')}
           </Text>
-          <Text style={styles.summarySub}>From {customers.filter((c) => c.balance > 0).length} customers</Text>
+          <Text style={styles.summarySub}>
+            {customers.filter((c) => c.balance > 0).length} ગ્રાહકો પાસેથી લેવાના
+          </Text>
         </View>
 
+        {/* You'll Give Card (લેવાના) */}
         <View style={[styles.summaryCard, styles.giveCard]}>
-          <Text style={styles.summaryLabel}>YOU'LL GIVE (લેવાના)</Text>
-          <Text style={[styles.summaryAmount, { color: '#dc2626' }]}>
+          <View style={styles.cardHeaderSmall}>
+            <Text style={styles.summaryLabel}>YOU'LL GIVE • ચૂકવવાના</Text>
+            <View style={styles.sealBadgeRed}>
+              <Text style={styles.sealBadgeText}>જાવક</Text>
+            </View>
+          </View>
+          <Text style={[styles.summaryAmount, { color: '#991b1b' }]}>
             ₹{totalYoullGive.toLocaleString('en-IN')}
           </Text>
-          <Text style={styles.summarySub}>To {customers.filter((c) => c.balance < 0).length} parties</Text>
+          <Text style={styles.summarySub}>
+            {customers.filter((c) => c.balance < 0).length} વેપારીઓને આપવાના
+          </Text>
         </View>
       </View>
 
-      {/* Search Bar */}
+      {/* Search Bar with Parchment Style */}
       <View style={styles.searchContainer}>
-        <Ionicons name="search" size={20} color="#64748b" style={styles.searchIcon} />
+        <Ionicons name="search" size={18} color="#78350f" style={styles.searchIcon} />
         <TextInput
           style={styles.searchInput}
-          placeholder="Search customer by name or phone..."
-          placeholderTextColor="#94a3b8"
+          placeholder="ગ્રાહક શોધો / Search customer by name or phone..."
+          placeholderTextColor="#a16207"
           value={searchQuery}
           onChangeText={setSearchQuery}
         />
         {searchQuery.length > 0 && (
           <TouchableOpacity onPress={() => setSearchQuery('')}>
-            <Ionicons name="close-circle" size={18} color="#94a3b8" />
+            <Ionicons name="close-circle" size={18} color="#a16207" />
           </TouchableOpacity>
         )}
       </View>
@@ -240,7 +257,7 @@ export default function HomeScreen() {
               styles.filterChipText,
               activeFilter === 'all' && styles.filterChipTextActive,
             ]}>
-            All ({customers.length})
+            બધા ખાતા ({customers.length})
           </Text>
         </TouchableOpacity>
 
@@ -252,7 +269,7 @@ export default function HomeScreen() {
               styles.filterChipText,
               activeFilter === 'due' && styles.filterChipTextActive,
             ]}>
-            Dues (Pending)
+            બાકી ઉઘરાણી (Dues)
           </Text>
         </TouchableOpacity>
 
@@ -264,7 +281,7 @@ export default function HomeScreen() {
               styles.filterChipText,
               activeFilter === 'settled' && styles.filterChipTextActive,
             ]}>
-            Settled (₹0)
+            ચૂકતે (₹0 Settled)
           </Text>
         </TouchableOpacity>
       </View>
@@ -288,11 +305,11 @@ export default function HomeScreen() {
                 setSelectedCustomer(item);
                 setShowTransactionModal(true);
               }}>
-              {/* Avatar */}
+              {/* Traditional Red Bahi-Khata Avatar */}
               <View
                 style={[
                   styles.avatar,
-                  { backgroundColor: item.avatarColor || '#3b82f6' },
+                  { backgroundColor: item.avatarColor || '#991b1b' },
                 ]}>
                 <Text style={styles.avatarText}>
                   {item.name.charAt(0).toUpperCase()}
@@ -303,7 +320,7 @@ export default function HomeScreen() {
               <View style={styles.customerDetails}>
                 <Text style={styles.customerName}>{item.name}</Text>
                 <Text style={styles.customerMeta}>
-                  {item.phone} • {item.lastTransactionDate}
+                  📞 {item.phone} • {item.lastTransactionDate}
                 </Text>
               </View>
 
@@ -319,7 +336,7 @@ export default function HomeScreen() {
                   ₹{Math.abs(item.balance).toLocaleString('en-IN')}
                 </Text>
                 <Text style={styles.balanceStatus}>
-                  {isDue ? "You'll Get" : isCredit ? "You'll Give" : 'Settled'}
+                  {isDue ? 'લેવાના (Due)' : isCredit ? 'આપવાના (Pay)' : 'ચૂકતે'}
                 </Text>
               </View>
 
@@ -328,7 +345,7 @@ export default function HomeScreen() {
                 <TouchableOpacity
                   style={styles.whatsappBtn}
                   onPress={() => sendWhatsAppReminder(item)}>
-                  <Ionicons name="logo-whatsapp" size={18} color="#22c55e" />
+                  <Ionicons name="logo-whatsapp" size={18} color="#15803d" />
                 </TouchableOpacity>
               )}
             </TouchableOpacity>
@@ -336,8 +353,11 @@ export default function HomeScreen() {
         }}
         ListEmptyComponent={
           <View style={styles.emptyContainer}>
-            <Ionicons name="receipt-outline" size={48} color="#cbd5e1" />
-            <Text style={styles.emptyText}>No customers found</Text>
+            <View style={styles.emptyIconBox}>
+              <Ionicons name="book-outline" size={36} color="#d97706" />
+            </View>
+            <Text style={styles.emptyTitle}>કોઈ ખાતું મળ્યું નથી</Text>
+            <Text style={styles.emptyText}>Add your first customer to start tracking udhar</Text>
             <TouchableOpacity
               style={styles.emptyAddBtn}
               onPress={() => setShowAddCustomerModal(true)}>
@@ -351,8 +371,8 @@ export default function HomeScreen() {
       <TouchableOpacity
         style={styles.fab}
         onPress={() => setShowAddCustomerModal(true)}>
-        <Ionicons name="add" size={26} color="#fff" />
-        <Text style={styles.fabText}>Add Customer</Text>
+        <Ionicons name="add" size={24} color="#fff" />
+        <Text style={styles.fabText}>નવું ખાતું ઉમેરો</Text>
       </TouchableOpacity>
 
       {/* MODAL: Add Customer */}
@@ -364,13 +384,16 @@ export default function HomeScreen() {
         <View style={styles.modalOverlay}>
           <View style={styles.modalCard}>
             <View style={styles.modalHeader}>
-              <Text style={styles.modalTitle}>Add New Customer</Text>
+              <View>
+                <Text style={styles.modalTitle}>નવું ગ્રાહક ખાતું (New Khata)</Text>
+                <Text style={styles.modalSubtitle}>Enter customer details to track ledger</Text>
+              </View>
               <TouchableOpacity onPress={() => setShowAddCustomerModal(false)}>
-                <Ionicons name="close" size={24} color="#64748b" />
+                <Ionicons name="close" size={24} color="#78350f" />
               </TouchableOpacity>
             </View>
 
-            <Text style={styles.inputLabel}>Customer Name *</Text>
+            <Text style={styles.inputLabel}>ગ્રાહકનું નામ (Customer Name) *</Text>
             <TextInput
               style={styles.modalInput}
               placeholder="e.g. Ramesh Patel"
@@ -378,7 +401,7 @@ export default function HomeScreen() {
               onChangeText={setNewCustomerName}
             />
 
-            <Text style={styles.inputLabel}>Mobile Number</Text>
+            <Text style={styles.inputLabel}>મોબાઇલ નંબર (Mobile Number)</Text>
             <TextInput
               style={styles.modalInput}
               placeholder="10-digit mobile number"
@@ -387,10 +410,10 @@ export default function HomeScreen() {
               onChangeText={setNewCustomerPhone}
             />
 
-            <Text style={styles.inputLabel}>Opening Balance (₹)</Text>
+            <Text style={styles.inputLabel}>જૂની બાકી રકમ (Opening Balance ₹)</Text>
             <TextInput
               style={styles.modalInput}
-              placeholder="0 (Optional credit/udhar balance)"
+              placeholder="0 (Optional credit balance)"
               keyboardType="numeric"
               value={newCustomerBalance}
               onChangeText={setNewCustomerBalance}
@@ -399,7 +422,7 @@ export default function HomeScreen() {
             <TouchableOpacity
               style={styles.saveBtn}
               onPress={handleAddCustomer}>
-              <Text style={styles.saveBtnText}>Save Customer</Text>
+              <Text style={styles.saveBtnText}>ખાતું સેવ કરો (Save Khata)</Text>
             </TouchableOpacity>
           </View>
         </View>
@@ -415,13 +438,13 @@ export default function HomeScreen() {
           <View style={styles.modalCard}>
             <View style={styles.modalHeader}>
               <View>
-                <Text style={styles.modalTitle}>Record Entry</Text>
+                <Text style={styles.modalTitle}>ખાતામાં નોંધણી (Record Entry)</Text>
                 <Text style={styles.modalSubtitle}>
-                  For {selectedCustomer?.name} (Current: ₹{selectedCustomer?.balance})
+                  {selectedCustomer?.name} • વર્તમાન બાકી: ₹{selectedCustomer?.balance}
                 </Text>
               </View>
               <TouchableOpacity onPress={() => setShowTransactionModal(false)}>
-                <Ionicons name="close" size={24} color="#64748b" />
+                <Ionicons name="close" size={24} color="#78350f" />
               </TouchableOpacity>
             </View>
 
@@ -438,7 +461,7 @@ export default function HomeScreen() {
                     styles.txTypeBtnText,
                     txType === 'credit_given' && styles.txTypeBtnTextActive,
                   ]}>
-                  You Gave ₹ (ઉધાર)
+                  ઉધાર આપ્યા ₹ (You Gave)
                 </Text>
               </TouchableOpacity>
 
@@ -453,12 +476,12 @@ export default function HomeScreen() {
                     styles.txTypeBtnText,
                     txType === 'payment_received' && styles.txTypeBtnTextActive,
                   ]}>
-                  You Got ₹ (જમા)
+                  જમા મળ્યા ₹ (You Got)
                 </Text>
               </TouchableOpacity>
             </View>
 
-            <Text style={styles.inputLabel}>Amount (₹) *</Text>
+            <Text style={styles.inputLabel}>રકમ (Amount ₹) *</Text>
             <TextInput
               style={[styles.modalInput, styles.amountInputBig]}
               placeholder="₹ 0"
@@ -468,10 +491,10 @@ export default function HomeScreen() {
               autoFocus
             />
 
-            <Text style={styles.inputLabel}>Item / Bill Details (Optional)</Text>
+            <Text style={styles.inputLabel}>સામાનની વિગત (Item description / Note)</Text>
             <TextInput
               style={styles.modalInput}
-              placeholder="e.g. 5kg Wheat Flour, 2 Oil packets"
+              placeholder="e.g. 5kg તેલ, લોટ, કરિયાણું"
               value={txNote}
               onChangeText={setTxNote}
             />
@@ -479,11 +502,11 @@ export default function HomeScreen() {
             <TouchableOpacity
               style={[
                 styles.saveBtn,
-                txType === 'credit_given' ? { backgroundColor: '#dc2626' } : { backgroundColor: '#16a34a' },
+                txType === 'credit_given' ? { backgroundColor: '#991b1b' } : { backgroundColor: '#059669' },
               ]}
               onPress={handleRecordTransaction}>
               <Text style={styles.saveBtnText}>
-                {txType === 'credit_given' ? 'Save Udhar Entry' : 'Save Jama Entry'}
+                {txType === 'credit_given' ? 'ઉધાર નોંધ સેવ કરો' : 'જમા નોંધ સેવ કરો'}
               </Text>
             </TouchableOpacity>
           </View>
@@ -500,29 +523,29 @@ export default function HomeScreen() {
           <View style={styles.modalCard}>
             <View style={styles.modalHeader}>
               <View>
-                <Text style={styles.modalTitle}>Shop Profile & Backup 🏪</Text>
+                <Text style={styles.modalTitle}>દુકાન પ્રોફાઇલ & બેકઅપ 🏪</Text>
                 <Text style={styles.modalSubtitle}>SaaS Cloud Ledger Management</Text>
               </View>
               <TouchableOpacity onPress={() => setShowProfileModal(false)}>
-                <Ionicons name="close" size={24} color="#64748b" />
+                <Ionicons name="close" size={24} color="#78350f" />
               </TouchableOpacity>
             </View>
 
             {/* Profile Info Card */}
             <View style={styles.profileInfoBox}>
               <View style={styles.profileRow}>
-                <Ionicons name="business" size={18} color="#2563eb" />
-                <Text style={styles.profileLabel}>Shop Name:</Text>
+                <Ionicons name="business" size={18} color="#991b1b" />
+                <Text style={styles.profileLabel}>દુકાનનું નામ:</Text>
                 <Text style={styles.profileValue}>{user?.shopName || 'Shree Kirana'}</Text>
               </View>
               <View style={styles.profileRow}>
-                <Ionicons name="person" size={18} color="#2563eb" />
-                <Text style={styles.profileLabel}>Owner:</Text>
+                <Ionicons name="person" size={18} color="#991b1b" />
+                <Text style={styles.profileLabel}>માલિકનું નામ:</Text>
                 <Text style={styles.profileValue}>{user?.ownerName || 'Patel'}</Text>
               </View>
               <View style={styles.profileRow}>
-                <Ionicons name="mail" size={18} color="#2563eb" />
-                <Text style={styles.profileLabel}>Account:</Text>
+                <Ionicons name="mail" size={18} color="#991b1b" />
+                <Text style={styles.profileLabel}>એકાઉન્ટ:</Text>
                 <Text style={styles.profileValue}>{user?.email || 'demo@ughrani.com'}</Text>
               </View>
             </View>
@@ -530,11 +553,11 @@ export default function HomeScreen() {
             {/* Disaster Recovery Status */}
             <View style={styles.backupCard}>
               <View style={styles.backupTitleRow}>
-                <Ionicons name="shield-checkmark" size={20} color="#16a34a" />
+                <Ionicons name="shield-checkmark" size={20} color="#059669" />
                 <Text style={styles.backupTitle}>Cloud Backup: Active 🟢</Text>
               </View>
               <Text style={styles.backupText}>
-                All ledger entries and dues are synced to encrypted PostgreSQL cloud storage. If this device is lost, login on any Android, iPhone or PC to retrieve 100% of your records.
+                તમામ ચોપડા ડેટા Supabase PostgreSQL ક્લાઉડ સ્ટોરેજમાં સુરક્ષિત છે. જો ફોન ખોવાઈ જાય તો પણ નવો ફોન લેતાની સાથે ૧૦૦% રેકોર્ડ પાછો મળી જશે.
               </Text>
             </View>
 
@@ -546,7 +569,7 @@ export default function HomeScreen() {
                 signOut();
               }}>
               <Ionicons name="log-out-outline" size={20} color="#dc2626" />
-              <Text style={styles.logoutBtnText}>Log Out from This Device</Text>
+              <Text style={styles.logoutBtnText}>લૉગ આઉટ (Log Out)</Text>
             </TouchableOpacity>
           </View>
         </View>
@@ -558,7 +581,7 @@ export default function HomeScreen() {
 const styles = StyleSheet.create({
   safeArea: {
     flex: 1,
-    backgroundColor: '#f8fafc',
+    backgroundColor: '#fffdf8', // Warm Indian parchment paper tone
   },
   header: {
     flexDirection: 'row',
@@ -566,33 +589,9 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     paddingHorizontal: 16,
     paddingVertical: 12,
-    backgroundColor: '#ffffff',
-    borderBottomWidth: 1,
-    borderBottomColor: '#f1f5f9',
-  },
-  headerTitleRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 8,
-  },
-  headerTitle: {
-    fontSize: 22,
-    fontWeight: '800',
-    color: '#0f172a',
-  },
-  headerBadge: {
-    fontSize: 12,
-    fontWeight: '700',
-    color: '#2563eb',
-    backgroundColor: '#dbeafe',
-    paddingHorizontal: 8,
-    paddingVertical: 2,
-    borderRadius: 6,
-  },
-  headerSubtitle: {
-    fontSize: 12,
-    color: '#64748b',
-    marginTop: 2,
+    backgroundColor: '#fffbf0',
+    borderBottomWidth: 1.5,
+    borderBottomColor: '#fde68a',
   },
   headerShopInfo: {
     flex: 1,
@@ -601,18 +600,28 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     gap: 6,
-    marginTop: 2,
+    marginTop: 4,
+  },
+  headerSubtitle: {
+    fontSize: 12,
+    fontWeight: '700',
+    color: '#78350f',
   },
   statusDot: {
-    width: 8,
-    height: 8,
-    borderRadius: 4,
+    width: 7,
+    height: 7,
+    borderRadius: 3.5,
   },
   dotGreen: {
-    backgroundColor: '#16a34a',
+    backgroundColor: '#10b981',
   },
   dotOrange: {
     backgroundColor: '#f59e0b',
+  },
+  syncStatusText: {
+    fontSize: 10,
+    fontWeight: '700',
+    color: '#92400e',
   },
   headerRightActions: {
     flexDirection: 'row',
@@ -622,89 +631,26 @@ const styles = StyleSheet.create({
   profileBtnHeader: {
     padding: 8,
     borderRadius: 8,
-    backgroundColor: '#eff6ff',
+    backgroundColor: '#fef3c7',
     borderWidth: 1,
-    borderColor: '#bfdbfe',
-  },
-  profileInfoBox: {
-    backgroundColor: '#f8fafc',
-    borderRadius: 12,
-    padding: 14,
-    gap: 10,
-    marginBottom: 16,
-    borderWidth: 1,
-    borderColor: '#e2e8f0',
-  },
-  profileRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 8,
-  },
-  profileLabel: {
-    fontSize: 13,
-    fontWeight: '600',
-    color: '#64748b',
-    width: 90,
-  },
-  profileValue: {
-    fontSize: 13,
-    fontWeight: '700',
-    color: '#0f172a',
-    flex: 1,
-  },
-  backupCard: {
-    backgroundColor: '#f0fdf4',
-    borderWidth: 1,
-    borderColor: '#bbf7d0',
-    borderRadius: 12,
-    padding: 14,
-    marginBottom: 16,
-  },
-  backupTitleRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 8,
-    marginBottom: 6,
-  },
-  backupTitle: {
-    fontSize: 13,
-    fontWeight: '700',
-    color: '#15803d',
-  },
-  backupText: {
-    fontSize: 12,
-    color: '#166534',
-    lineHeight: 18,
-  },
-  logoutBtn: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'center',
-    gap: 8,
-    paddingVertical: 12,
-    borderRadius: 10,
-    borderWidth: 1.5,
-    borderColor: '#fca5a5',
-    backgroundColor: '#fef2f2',
-    marginTop: 6,
-  },
-  logoutBtnText: {
-    color: '#dc2626',
-    fontSize: 14,
-    fontWeight: '700',
+    borderColor: '#f59e0b',
   },
   addBtnHeader: {
     flexDirection: 'row',
     alignItems: 'center',
-    backgroundColor: '#2563eb',
+    backgroundColor: '#991b1b', // Traditional Bahi-Khata Red
     paddingHorizontal: 12,
     paddingVertical: 8,
     borderRadius: 8,
     gap: 4,
+    shadowColor: '#991b1b',
+    shadowOpacity: 0.25,
+    shadowRadius: 4,
+    elevation: 3,
   },
   addBtnText: {
     color: '#ffffff',
-    fontWeight: '600',
+    fontWeight: '700',
     fontSize: 13,
   },
   summaryContainer: {
@@ -716,34 +662,61 @@ const styles = StyleSheet.create({
   summaryCard: {
     flex: 1,
     backgroundColor: '#ffffff',
-    borderRadius: 12,
+    borderRadius: 14,
     padding: 14,
-    borderWidth: 1,
-    shadowColor: '#000',
-    shadowOpacity: 0.04,
+    borderWidth: 1.5,
+    shadowColor: '#78350f',
+    shadowOpacity: 0.05,
     shadowRadius: 6,
     elevation: 2,
   },
   getCard: {
-    borderColor: '#bbf7d0',
+    borderColor: '#a7f3d0',
+    borderTopWidth: 4,
+    borderTopColor: '#059669',
   },
   giveCard: {
     borderColor: '#fecaca',
+    borderTopWidth: 4,
+    borderTopColor: '#991b1b',
+  },
+  cardHeaderSmall: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+  },
+  sealBadgeGreen: {
+    backgroundColor: '#d1fae5',
+    paddingHorizontal: 6,
+    paddingVertical: 1,
+    borderRadius: 4,
+  },
+  sealBadgeRed: {
+    backgroundColor: '#fee2e2',
+    paddingHorizontal: 6,
+    paddingVertical: 1,
+    borderRadius: 4,
+  },
+  sealBadgeText: {
+    fontSize: 9,
+    fontWeight: '800',
+    color: '#0f172a',
   },
   summaryLabel: {
-    fontSize: 11,
-    fontWeight: '700',
-    color: '#64748b',
-    letterSpacing: 0.5,
+    fontSize: 10,
+    fontWeight: '800',
+    color: '#78350f',
+    letterSpacing: 0.3,
   },
   summaryAmount: {
-    fontSize: 20,
-    fontWeight: '800',
+    fontSize: 22,
+    fontWeight: '900',
     marginVertical: 4,
   },
   summarySub: {
-    fontSize: 11,
-    color: '#94a3b8',
+    fontSize: 10,
+    color: '#854d0e',
+    fontWeight: '600',
   },
   searchContainer: {
     flexDirection: 'row',
@@ -753,8 +726,8 @@ const styles = StyleSheet.create({
     marginTop: 12,
     borderRadius: 10,
     paddingHorizontal: 12,
-    borderWidth: 1,
-    borderColor: '#e2e8f0',
+    borderWidth: 1.5,
+    borderColor: '#fde68a',
   },
   searchIcon: {
     marginRight: 8,
@@ -762,8 +735,9 @@ const styles = StyleSheet.create({
   searchInput: {
     flex: 1,
     height: 42,
-    fontSize: 14,
-    color: '#0f172a',
+    fontSize: 13,
+    color: '#78350f',
+    fontWeight: '500',
   },
   filterRow: {
     flexDirection: 'row',
@@ -774,16 +748,19 @@ const styles = StyleSheet.create({
   filterChip: {
     paddingHorizontal: 12,
     paddingVertical: 6,
-    borderRadius: 20,
-    backgroundColor: '#e2e8f0',
+    borderRadius: 18,
+    backgroundColor: '#fef3c7',
+    borderWidth: 1,
+    borderColor: '#fde68a',
   },
   filterChipActive: {
-    backgroundColor: '#0f172a',
+    backgroundColor: '#991b1b',
+    borderColor: '#991b1b',
   },
   filterChipText: {
-    fontSize: 12,
-    fontWeight: '600',
-    color: '#475569',
+    fontSize: 11,
+    fontWeight: '700',
+    color: '#78350f',
   },
   filterChipTextActive: {
     color: '#ffffff',
@@ -801,10 +778,10 @@ const styles = StyleSheet.create({
     borderRadius: 12,
     marginBottom: 8,
     borderWidth: 1,
-    borderColor: '#f1f5f9',
-    shadowColor: '#000',
-    shadowOpacity: 0.02,
-    shadowRadius: 4,
+    borderColor: '#fef3c7',
+    shadowColor: '#78350f',
+    shadowOpacity: 0.04,
+    shadowRadius: 5,
     elevation: 1,
   },
   avatar: {
@@ -814,75 +791,92 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     alignItems: 'center',
     marginRight: 12,
+    borderWidth: 1.5,
+    borderColor: '#f59e0b',
   },
   avatarText: {
-    color: '#ffffff',
+    color: '#fef3c7',
     fontSize: 18,
-    fontWeight: '700',
+    fontWeight: '900',
   },
   customerDetails: {
     flex: 1,
   },
   customerName: {
     fontSize: 15,
-    fontWeight: '700',
-    color: '#0f172a',
+    fontWeight: '800',
+    color: '#1e293b',
   },
   customerMeta: {
-    fontSize: 12,
+    fontSize: 11,
     color: '#64748b',
     marginTop: 2,
+    fontWeight: '500',
   },
   balanceContainer: {
     alignItems: 'flex-end',
     marginRight: 8,
   },
   balanceAmount: {
-    fontSize: 15,
-    fontWeight: '800',
+    fontSize: 16,
+    fontWeight: '900',
   },
   amountDue: {
-    color: '#16a34a',
+    color: '#047857',
   },
   amountGive: {
-    color: '#dc2626',
+    color: '#991b1b',
   },
   amountSettled: {
     color: '#64748b',
   },
   balanceStatus: {
     fontSize: 10,
-    fontWeight: '600',
-    color: '#94a3b8',
+    fontWeight: '700',
+    color: '#78350f',
     marginTop: 2,
   },
   whatsappBtn: {
-    padding: 6,
-    backgroundColor: '#f0fdf4',
+    padding: 7,
+    backgroundColor: '#ecfdf5',
     borderRadius: 20,
     borderWidth: 1,
-    borderColor: '#bbf7d0',
+    borderColor: '#a7f3d0',
   },
   emptyContainer: {
     alignItems: 'center',
     justifyContent: 'center',
     paddingVertical: 48,
   },
+  emptyIconBox: {
+    width: 64,
+    height: 64,
+    borderRadius: 32,
+    backgroundColor: '#fef3c7',
+    justifyContent: 'center',
+    alignItems: 'center',
+    marginBottom: 10,
+  },
+  emptyTitle: {
+    fontSize: 16,
+    fontWeight: '800',
+    color: '#78350f',
+  },
   emptyText: {
-    marginTop: 10,
-    fontSize: 14,
-    color: '#64748b',
+    marginTop: 4,
+    fontSize: 13,
+    color: '#854d0e',
   },
   emptyAddBtn: {
     marginTop: 14,
-    backgroundColor: '#2563eb',
+    backgroundColor: '#991b1b',
     paddingHorizontal: 16,
-    paddingVertical: 8,
+    paddingVertical: 10,
     borderRadius: 8,
   },
   emptyAddBtnText: {
     color: '#fff',
-    fontWeight: '600',
+    fontWeight: '700',
     fontSize: 13,
   },
   fab: {
@@ -891,19 +885,21 @@ const styles = StyleSheet.create({
     right: 20,
     flexDirection: 'row',
     alignItems: 'center',
-    backgroundColor: '#2563eb',
+    backgroundColor: '#991b1b',
     paddingHorizontal: 20,
     paddingVertical: 14,
     borderRadius: 30,
     gap: 8,
-    shadowColor: '#1d4ed8',
-    shadowOpacity: 0.35,
+    shadowColor: '#991b1b',
+    shadowOpacity: 0.4,
     shadowRadius: 10,
     elevation: 6,
+    borderWidth: 1.5,
+    borderColor: '#f59e0b',
   },
   fabText: {
     color: '#ffffff',
-    fontWeight: '700',
+    fontWeight: '800',
     fontSize: 15,
   },
   modalOverlay: {
@@ -912,11 +908,13 @@ const styles = StyleSheet.create({
     justifyContent: 'flex-end',
   },
   modalCard: {
-    backgroundColor: '#ffffff',
+    backgroundColor: '#fffdf8',
     borderTopLeftRadius: 20,
     borderTopRightRadius: 20,
     padding: 20,
     maxHeight: '90%',
+    borderTopWidth: 3,
+    borderTopColor: '#f59e0b',
   },
   modalHeader: {
     flexDirection: 'row',
@@ -926,37 +924,38 @@ const styles = StyleSheet.create({
   },
   modalTitle: {
     fontSize: 18,
-    fontWeight: '800',
-    color: '#0f172a',
+    fontWeight: '900',
+    color: '#7f1d1d',
   },
   modalSubtitle: {
     fontSize: 12,
-    color: '#64748b',
+    color: '#78350f',
     marginTop: 2,
+    fontWeight: '600',
   },
   inputLabel: {
     fontSize: 12,
-    fontWeight: '700',
-    color: '#334155',
+    fontWeight: '800',
+    color: '#78350f',
     marginBottom: 6,
     marginTop: 10,
   },
   modalInput: {
-    borderWidth: 1,
-    borderColor: '#cbd5e1',
+    borderWidth: 1.5,
+    borderColor: '#fde68a',
     borderRadius: 10,
     paddingHorizontal: 12,
     height: 44,
     fontSize: 14,
     color: '#0f172a',
-    backgroundColor: '#f8fafc',
+    backgroundColor: '#ffffff',
   },
   amountInputBig: {
-    fontSize: 22,
-    fontWeight: '700',
-    height: 52,
+    fontSize: 24,
+    fontWeight: '900',
+    height: 54,
     textAlign: 'center',
-    color: '#0f172a',
+    color: '#7f1d1d',
   },
   txTypeSelector: {
     flexDirection: 'row',
@@ -968,36 +967,108 @@ const styles = StyleSheet.create({
     paddingVertical: 12,
     borderRadius: 10,
     borderWidth: 1.5,
-    borderColor: '#cbd5e1',
+    borderColor: '#fde68a',
     alignItems: 'center',
-    backgroundColor: '#f8fafc',
+    backgroundColor: '#fffbf0',
   },
   txTypeBtnGiveActive: {
-    borderColor: '#dc2626',
-    backgroundColor: '#fef2f2',
+    borderColor: '#991b1b',
+    backgroundColor: '#fee2e2',
   },
   txTypeBtnGetActive: {
-    borderColor: '#16a34a',
-    backgroundColor: '#f0fdf4',
+    borderColor: '#059669',
+    backgroundColor: '#d1fae5',
   },
   txTypeBtnText: {
-    fontSize: 13,
-    fontWeight: '700',
-    color: '#64748b',
+    fontSize: 12,
+    fontWeight: '800',
+    color: '#78350f',
   },
   txTypeBtnTextActive: {
     color: '#0f172a',
   },
   saveBtn: {
-    backgroundColor: '#2563eb',
+    backgroundColor: '#991b1b',
     marginTop: 20,
     paddingVertical: 14,
     borderRadius: 10,
     alignItems: 'center',
+    shadowColor: '#991b1b',
+    shadowOpacity: 0.3,
+    shadowRadius: 5,
+    elevation: 3,
   },
   saveBtnText: {
     color: '#ffffff',
     fontSize: 15,
+    fontWeight: '800',
+  },
+  profileInfoBox: {
+    backgroundColor: '#fffbf0',
+    borderRadius: 12,
+    padding: 14,
+    gap: 10,
+    marginBottom: 16,
+    borderWidth: 1.5,
+    borderColor: '#fde68a',
+  },
+  profileRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 8,
+  },
+  profileLabel: {
+    fontSize: 13,
     fontWeight: '700',
+    color: '#78350f',
+    width: 100,
+  },
+  profileValue: {
+    fontSize: 13,
+    fontWeight: '800',
+    color: '#0f172a',
+    flex: 1,
+  },
+  backupCard: {
+    backgroundColor: '#ecfdf5',
+    borderWidth: 1.5,
+    borderColor: '#a7f3d0',
+    borderRadius: 12,
+    padding: 14,
+    marginBottom: 16,
+  },
+  backupTitleRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 8,
+    marginBottom: 6,
+  },
+  backupTitle: {
+    fontSize: 13,
+    fontWeight: '800',
+    color: '#047857',
+  },
+  backupText: {
+    fontSize: 12,
+    color: '#065f46',
+    lineHeight: 18,
+    fontWeight: '500',
+  },
+  logoutBtn: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: 8,
+    paddingVertical: 12,
+    borderRadius: 10,
+    borderWidth: 1.5,
+    borderColor: '#fca5a5',
+    backgroundColor: '#fef2f2',
+    marginTop: 6,
+  },
+  logoutBtnText: {
+    color: '#dc2626',
+    fontSize: 14,
+    fontWeight: '800',
   },
 });

@@ -25,7 +25,10 @@ export default function AppTabs() {
             <TabButton>Customers (Khata)</TabButton>
           </TabTrigger>
           <TabTrigger name="explore" href="/explore" asChild>
-            <TabButton>Cashbook & Reports</TabButton>
+            <TabButton>Cashbook</TabButton>
+          </TabTrigger>
+          <TabTrigger name="admin" href="/admin" asChild>
+            <TabButton>👑 Admin Console</TabButton>
           </TabTrigger>
         </CustomTabList>
       </TabList>

@@ -13,6 +13,7 @@ import {
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
 import { useAuth } from '@/context/AuthContext';
+import UghraniLogo from '@/components/ui/UghraniLogo';
 
 export default function AuthScreen() {
   const { signIn, signUp, loginAsDemo, isConfigured } = useAuth();
@@ -64,17 +65,11 @@ export default function AuthScreen() {
         <ScrollView
           contentContainerStyle={styles.scrollContent}
           showsVerticalScrollIndicator={false}>
-          {/* Header Brand */}
+          {/* Header Handmade Brand Logo */}
           <View style={styles.brandHeader}>
-            <View style={styles.logoBadge}>
-              <Ionicons name="book" size={32} color="#2563eb" />
-            </View>
-            <View style={styles.titleRow}>
-              <Text style={styles.brandTitle}>Ughrani</Text>
-              <Text style={styles.brandSubBadge}>ઉઘરાણી</Text>
-            </View>
+            <UghraniLogo size="lg" showSubtitle={true} />
             <Text style={styles.brandTagline}>
-              Secure Cloud Ledger for Shopkeepers & Small Businesses
+              વેપારીઓ માટેનો ૧૦૦% સુરક્ષિત ડિજિટલ લાલ ચોપડો
             </Text>
           </View>
 
@@ -91,7 +86,7 @@ export default function AuthScreen() {
                   styles.tabButtonText,
                   mode === 'login' && styles.tabButtonTextActive,
                 ]}>
-                Shop Login
+                દુકાન લૉગિન (Login)
               </Text>
             </TouchableOpacity>
 
@@ -106,7 +101,7 @@ export default function AuthScreen() {
                   styles.tabButtonText,
                   mode === 'register' && styles.tabButtonTextActive,
                 ]}>
-                Register Shop
+                નવી દુકાન નોંધણી (Register)
               </Text>
             </TouchableOpacity>
           </View>
@@ -123,29 +118,29 @@ export default function AuthScreen() {
           <View style={styles.card}>
             {mode === 'register' && (
               <>
-                <Text style={styles.inputLabel}>Shop / Business Name *</Text>
+                <Text style={styles.inputLabel}>દુકાનનું નામ (Shop / Business Name) *</Text>
                 <TextInput
                   style={styles.input}
-                  placeholder="e.g. Shree Ganesha Kirana Store"
-                  placeholderTextColor="#94a3b8"
+                  placeholder="e.g. શ્રી ગણેશ કિરાણા સ્ટોર"
+                  placeholderTextColor="#a16207"
                   value={shopName}
                   onChangeText={setShopName}
                 />
 
-                <Text style={styles.inputLabel}>Owner Name</Text>
+                <Text style={styles.inputLabel}>વેપારીનું નામ (Owner Name)</Text>
                 <TextInput
                   style={styles.input}
-                  placeholder="e.g. Ramesh Patel"
-                  placeholderTextColor="#94a3b8"
+                  placeholder="e.g. રમેશભાઈ પટેલ"
+                  placeholderTextColor="#a16207"
                   value={ownerName}
                   onChangeText={setOwnerName}
                 />
 
-                <Text style={styles.inputLabel}>Mobile Number</Text>
+                <Text style={styles.inputLabel}>મોબાઇલ નંબર (Mobile Number)</Text>
                 <TextInput
                   style={styles.input}
                   placeholder="10-digit mobile number"
-                  placeholderTextColor="#94a3b8"
+                  placeholderTextColor="#a16207"
                   keyboardType="phone-pad"
                   value={phone}
                   onChangeText={setPhone}
@@ -153,22 +148,22 @@ export default function AuthScreen() {
               </>
             )}
 
-            <Text style={styles.inputLabel}>Email Address *</Text>
+            <Text style={styles.inputLabel}>ઇમેઇલ એડ્રેસ (Email Address) *</Text>
             <TextInput
               style={styles.input}
               placeholder="shop@example.com"
-              placeholderTextColor="#94a3b8"
+              placeholderTextColor="#a16207"
               keyboardType="email-address"
               autoCapitalize="none"
               value={email}
               onChangeText={setEmail}
             />
 
-            <Text style={styles.inputLabel}>Password *</Text>
+            <Text style={styles.inputLabel}>પાસવર્ડ (Password) *</Text>
             <TextInput
               style={styles.input}
               placeholder="••••••••"
-              placeholderTextColor="#94a3b8"
+              placeholderTextColor="#a16207"
               secureTextEntry
               value={password}
               onChangeText={setPassword}
@@ -182,7 +177,7 @@ export default function AuthScreen() {
                 <ActivityIndicator color="#ffffff" />
               ) : (
                 <Text style={styles.submitBtnText}>
-                  {mode === 'login' ? 'Login to My Shop' : 'Create Shop & Start Khata'}
+                  {mode === 'login' ? 'ચોપડામાં પ્રવેશ કરો (Login)' : 'નવું ખાતું શરૂ કરો (Register)'}
                 </Text>
               )}
             </TouchableOpacity>
@@ -191,39 +186,33 @@ export default function AuthScreen() {
             <TouchableOpacity
               style={styles.demoBtn}
               onPress={loginAsDemo}>
-              <Ionicons name="sparkles" size={16} color="#475569" />
-              <Text style={styles.demoBtnText}>Try Demo Account (Instant Access)</Text>
+              <Ionicons name="sparkles" size={16} color="#78350f" />
+              <Text style={styles.demoBtnText}>ડેમો એકાઉન્ટથી જુઓ (Instant Access)</Text>
             </TouchableOpacity>
           </View>
 
-          {/* Security & Multi-Device Trust Features */}
+          {/* Security & Trust Features */}
           <View style={styles.trustContainer}>
             <View style={styles.trustItem}>
-              <Ionicons name="shield-checkmark" size={20} color="#16a34a" />
+              <View style={[styles.trustIconCircle, { backgroundColor: '#dcfce7' }]}>
+                <Ionicons name="shield-checkmark" size={20} color="#059669" />
+              </View>
               <View style={styles.trustTextCol}>
-                <Text style={styles.trustTitle}>100% Disaster Proof Backup</Text>
+                <Text style={styles.trustTitle}>૧૦૦% ગેરંટીડ ક્લાઉડ બેકઅપ</Text>
                 <Text style={styles.trustDesc}>
-                  Lost or broken phone? Login on any device to restore all customer balances instantly.
+                  ફોન તૂટે કે ખોવાય, કોઈપણ ફોનમાં લૉગિન કરતાં તમામ ઉઘરાણી ડેટા સુરક્ષિત પાછો મળશે.
                 </Text>
               </View>
             </View>
 
             <View style={styles.trustItem}>
-              <Ionicons name="sync-circle" size={20} color="#2563eb" />
-              <View style={styles.trustTextCol}>
-                <Text style={styles.trustTitle}>Multi-Device Sync</Text>
-                <Text style={styles.trustDesc}>
-                  Works seamlessly across Android, iPhone, tablet, and PC browser simultaneously.
-                </Text>
+              <View style={[styles.trustIconCircle, { backgroundColor: '#fef3c7' }]}>
+                <Ionicons name="sync-circle" size={20} color="#d97706" />
               </View>
-            </View>
-
-            <View style={styles.trustItem}>
-              <Ionicons name="lock-closed" size={20} color="#7c3aed" />
               <View style={styles.trustTextCol}>
-                <Text style={styles.trustTitle}>Bank-Grade Data Privacy</Text>
+                <Text style={styles.trustTitle}>ફોન અને કમ્પ્યુટર બંનેમાં સિંક</Text>
                 <Text style={styles.trustDesc}>
-                  PostgreSQL Row-Level Security ensures only you have access to your shop's accounts.
+                  એક જ સમયે એન્ડ્રોઇડ, આઇફોન અને કોમ્પ્યુટર બ્રાઉઝર પર એકસાથે વાપરો.
                 </Text>
               </View>
             </View>
@@ -237,7 +226,7 @@ export default function AuthScreen() {
 const styles = StyleSheet.create({
   safeArea: {
     flex: 1,
-    backgroundColor: '#f8fafc',
+    backgroundColor: '#fffdf8',
   },
   container: {
     flex: 1,
@@ -245,7 +234,7 @@ const styles = StyleSheet.create({
   scrollContent: {
     paddingHorizontal: 20,
     paddingVertical: 24,
-    maxWidth: 520,
+    maxWidth: 500,
     width: '100%',
     alignSelf: 'center',
   },
@@ -253,46 +242,18 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     marginBottom: 24,
   },
-  logoBadge: {
-    width: 64,
-    height: 64,
-    borderRadius: 20,
-    backgroundColor: '#eff6ff',
-    borderWidth: 1,
-    borderColor: '#bfdbfe',
-    justifyContent: 'center',
-    alignItems: 'center',
-    marginBottom: 12,
-  },
-  titleRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 8,
-  },
-  brandTitle: {
-    fontSize: 28,
-    fontWeight: '800',
-    color: '#0f172a',
-  },
-  brandSubBadge: {
-    fontSize: 14,
-    fontWeight: '700',
-    color: '#2563eb',
-    backgroundColor: '#dbeafe',
-    paddingHorizontal: 8,
-    paddingVertical: 2,
-    borderRadius: 6,
-  },
   brandTagline: {
-    fontSize: 13,
-    color: '#64748b',
+    fontSize: 12,
+    fontWeight: '700',
+    color: '#854d0e',
     textAlign: 'center',
-    marginTop: 6,
-    paddingHorizontal: 16,
+    marginTop: 8,
   },
   tabContainer: {
     flexDirection: 'row',
-    backgroundColor: '#e2e8f0',
+    backgroundColor: '#fef3c7',
+    borderWidth: 1,
+    borderColor: '#fde68a',
     borderRadius: 12,
     padding: 4,
     marginBottom: 16,
@@ -304,20 +265,19 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   tabButtonActive: {
-    backgroundColor: '#ffffff',
-    shadowColor: '#000',
-    shadowOpacity: 0.05,
+    backgroundColor: '#991b1b',
+    shadowColor: '#991b1b',
+    shadowOpacity: 0.25,
     shadowRadius: 4,
     elevation: 2,
   },
   tabButtonText: {
-    fontSize: 14,
-    fontWeight: '600',
-    color: '#64748b',
+    fontSize: 13,
+    fontWeight: '700',
+    color: '#78350f',
   },
   tabButtonTextActive: {
-    color: '#0f172a',
-    fontWeight: '700',
+    color: '#ffffff',
   },
   errorBox: {
     flexDirection: 'row',
@@ -333,31 +293,31 @@ const styles = StyleSheet.create({
   errorText: {
     color: '#b91c1c',
     fontSize: 13,
-    fontWeight: '500',
+    fontWeight: '600',
     flex: 1,
   },
   card: {
     backgroundColor: '#ffffff',
     borderRadius: 16,
     padding: 20,
-    borderWidth: 1,
-    borderColor: '#e2e8f0',
-    shadowColor: '#000',
-    shadowOpacity: 0.04,
+    borderWidth: 1.5,
+    borderColor: '#fde68a',
+    shadowColor: '#78350f',
+    shadowOpacity: 0.05,
     shadowRadius: 8,
-    elevation: 2,
+    elevation: 3,
   },
   inputLabel: {
     fontSize: 12,
-    fontWeight: '700',
-    color: '#334155',
+    fontWeight: '800',
+    color: '#78350f',
     marginBottom: 6,
     marginTop: 10,
   },
   input: {
-    backgroundColor: '#f8fafc',
-    borderWidth: 1,
-    borderColor: '#cbd5e1',
+    backgroundColor: '#fffdfa',
+    borderWidth: 1.5,
+    borderColor: '#fde68a',
     borderRadius: 10,
     paddingHorizontal: 12,
     height: 44,
@@ -365,58 +325,71 @@ const styles = StyleSheet.create({
     color: '#0f172a',
   },
   submitBtn: {
-    backgroundColor: '#2563eb',
+    backgroundColor: '#991b1b', // Traditional Bahi-Khata Red
     marginTop: 20,
     paddingVertical: 14,
     borderRadius: 10,
     alignItems: 'center',
+    shadowColor: '#991b1b',
+    shadowOpacity: 0.3,
+    shadowRadius: 6,
+    elevation: 3,
   },
   submitBtnText: {
     color: '#ffffff',
     fontSize: 15,
-    fontWeight: '700',
+    fontWeight: '800',
   },
   demoBtn: {
     flexDirection: 'row',
     justifyContent: 'center',
     alignItems: 'center',
-    backgroundColor: '#f1f5f9',
+    backgroundColor: '#fef3c7',
+    borderWidth: 1,
+    borderColor: '#fde68a',
     marginTop: 12,
     paddingVertical: 12,
     borderRadius: 10,
     gap: 6,
   },
   demoBtnText: {
-    color: '#334155',
+    color: '#78350f',
     fontSize: 13,
-    fontWeight: '600',
+    fontWeight: '700',
   },
   trustContainer: {
-    marginTop: 28,
-    gap: 16,
+    marginTop: 24,
+    gap: 12,
   },
   trustItem: {
     flexDirection: 'row',
     backgroundColor: '#ffffff',
-    padding: 14,
+    padding: 12,
     borderRadius: 12,
     borderWidth: 1,
-    borderColor: '#f1f5f9',
+    borderColor: '#fde68a',
     gap: 12,
-    alignItems: 'flex-start',
+    alignItems: 'center',
+  },
+  trustIconCircle: {
+    width: 38,
+    height: 38,
+    borderRadius: 19,
+    justifyContent: 'center',
+    alignItems: 'center',
   },
   trustTextCol: {
     flex: 1,
   },
   trustTitle: {
     fontSize: 13,
-    fontWeight: '700',
-    color: '#0f172a',
+    fontWeight: '800',
+    color: '#78350f',
   },
   trustDesc: {
-    fontSize: 12,
-    color: '#64748b',
+    fontSize: 11,
+    color: '#854d0e',
     marginTop: 2,
-    lineHeight: 17,
+    lineHeight: 16,
   },
 });

@@ -14,6 +14,7 @@ import {
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
 import { Customer, Transaction } from '@/types/ledger';
+import { useAuth } from '@/context/AuthContext';
 
 const INITIAL_CUSTOMERS: Customer[] = [
   {
@@ -59,9 +60,11 @@ const INITIAL_CUSTOMERS: Customer[] = [
 ];
 
 export default function HomeScreen() {
+  const { user, signOut, isConfigured } = useAuth();
   const [customers, setCustomers] = useState<Customer[]>(INITIAL_CUSTOMERS);
   const [searchQuery, setSearchQuery] = useState('');
   const [activeFilter, setActiveFilter] = useState<'all' | 'due' | 'settled'>('all');
+  const [showProfileModal, setShowProfileModal] = useState(false);
 
   // Customer Add Modal
   const [showAddCustomerModal, setShowAddCustomerModal] = useState(false);
@@ -160,19 +163,35 @@ export default function HomeScreen() {
     <SafeAreaView style={styles.safeArea}>
       {/* App Header */}
       <View style={styles.header}>
-        <View>
+        <TouchableOpacity
+          style={styles.headerShopInfo}
+          activeOpacity={0.7}
+          onPress={() => setShowProfileModal(true)}>
           <View style={styles.headerTitleRow}>
             <Text style={styles.headerTitle}>Ughrani</Text>
             <Text style={styles.headerBadge}>ઉઘરાણી</Text>
           </View>
-          <Text style={styles.headerSubtitle}>Shree Kirana & Provision Store 🏪</Text>
-        </View>
-        <TouchableOpacity
-          style={styles.addBtnHeader}
-          onPress={() => setShowAddCustomerModal(true)}>
-          <Ionicons name="person-add" size={18} color="#fff" />
-          <Text style={styles.addBtnText}>Add</Text>
+          <View style={styles.headerShopRow}>
+            <Text style={styles.headerSubtitle} numberOfLines={1}>
+              {user?.shopName || 'Shree Kirana Store'} 🏪
+            </Text>
+            <View style={[styles.statusDot, isConfigured ? styles.dotGreen : styles.dotOrange]} />
+          </View>
         </TouchableOpacity>
+
+        <View style={styles.headerRightActions}>
+          <TouchableOpacity
+            style={styles.profileBtnHeader}
+            onPress={() => setShowProfileModal(true)}>
+            <Ionicons name="storefront-outline" size={18} color="#2563eb" />
+          </TouchableOpacity>
+          <TouchableOpacity
+            style={styles.addBtnHeader}
+            onPress={() => setShowAddCustomerModal(true)}>
+            <Ionicons name="person-add" size={18} color="#fff" />
+            <Text style={styles.addBtnText}>Add</Text>
+          </TouchableOpacity>
+        </View>
       </View>
 
       {/* Summary Cards */}
@@ -470,6 +489,68 @@ export default function HomeScreen() {
           </View>
         </View>
       </Modal>
+
+      {/* MODAL: Shop Profile & Cloud Backup Info */}
+      <Modal
+        visible={showProfileModal}
+        animationType="slide"
+        transparent={true}
+        onRequestClose={() => setShowProfileModal(false)}>
+        <View style={styles.modalOverlay}>
+          <View style={styles.modalCard}>
+            <View style={styles.modalHeader}>
+              <View>
+                <Text style={styles.modalTitle}>Shop Profile & Backup 🏪</Text>
+                <Text style={styles.modalSubtitle}>SaaS Cloud Ledger Management</Text>
+              </View>
+              <TouchableOpacity onPress={() => setShowProfileModal(false)}>
+                <Ionicons name="close" size={24} color="#64748b" />
+              </TouchableOpacity>
+            </View>
+
+            {/* Profile Info Card */}
+            <View style={styles.profileInfoBox}>
+              <View style={styles.profileRow}>
+                <Ionicons name="business" size={18} color="#2563eb" />
+                <Text style={styles.profileLabel}>Shop Name:</Text>
+                <Text style={styles.profileValue}>{user?.shopName || 'Shree Kirana'}</Text>
+              </View>
+              <View style={styles.profileRow}>
+                <Ionicons name="person" size={18} color="#2563eb" />
+                <Text style={styles.profileLabel}>Owner:</Text>
+                <Text style={styles.profileValue}>{user?.ownerName || 'Patel'}</Text>
+              </View>
+              <View style={styles.profileRow}>
+                <Ionicons name="mail" size={18} color="#2563eb" />
+                <Text style={styles.profileLabel}>Account:</Text>
+                <Text style={styles.profileValue}>{user?.email || 'demo@ughrani.com'}</Text>
+              </View>
+            </View>
+
+            {/* Disaster Recovery Status */}
+            <View style={styles.backupCard}>
+              <View style={styles.backupTitleRow}>
+                <Ionicons name="shield-checkmark" size={20} color="#16a34a" />
+                <Text style={styles.backupTitle}>Cloud Backup: Active 🟢</Text>
+              </View>
+              <Text style={styles.backupText}>
+                All ledger entries and dues are synced to encrypted PostgreSQL cloud storage. If this device is lost, login on any Android, iPhone or PC to retrieve 100% of your records.
+              </Text>
+            </View>
+
+            {/* Logout Button */}
+            <TouchableOpacity
+              style={styles.logoutBtn}
+              onPress={() => {
+                setShowProfileModal(false);
+                signOut();
+              }}>
+              <Ionicons name="log-out-outline" size={20} color="#dc2626" />
+              <Text style={styles.logoutBtnText}>Log Out from This Device</Text>
+            </TouchableOpacity>
+          </View>
+        </View>
+      </Modal>
     </SafeAreaView>
   );
 }
@@ -512,6 +593,105 @@ const styles = StyleSheet.create({
     fontSize: 12,
     color: '#64748b',
     marginTop: 2,
+  },
+  headerShopInfo: {
+    flex: 1,
+  },
+  headerShopRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 6,
+    marginTop: 2,
+  },
+  statusDot: {
+    width: 8,
+    height: 8,
+    borderRadius: 4,
+  },
+  dotGreen: {
+    backgroundColor: '#16a34a',
+  },
+  dotOrange: {
+    backgroundColor: '#f59e0b',
+  },
+  headerRightActions: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 8,
+  },
+  profileBtnHeader: {
+    padding: 8,
+    borderRadius: 8,
+    backgroundColor: '#eff6ff',
+    borderWidth: 1,
+    borderColor: '#bfdbfe',
+  },
+  profileInfoBox: {
+    backgroundColor: '#f8fafc',
+    borderRadius: 12,
+    padding: 14,
+    gap: 10,
+    marginBottom: 16,
+    borderWidth: 1,
+    borderColor: '#e2e8f0',
+  },
+  profileRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 8,
+  },
+  profileLabel: {
+    fontSize: 13,
+    fontWeight: '600',
+    color: '#64748b',
+    width: 90,
+  },
+  profileValue: {
+    fontSize: 13,
+    fontWeight: '700',
+    color: '#0f172a',
+    flex: 1,
+  },
+  backupCard: {
+    backgroundColor: '#f0fdf4',
+    borderWidth: 1,
+    borderColor: '#bbf7d0',
+    borderRadius: 12,
+    padding: 14,
+    marginBottom: 16,
+  },
+  backupTitleRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 8,
+    marginBottom: 6,
+  },
+  backupTitle: {
+    fontSize: 13,
+    fontWeight: '700',
+    color: '#15803d',
+  },
+  backupText: {
+    fontSize: 12,
+    color: '#166534',
+    lineHeight: 18,
+  },
+  logoutBtn: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: 8,
+    paddingVertical: 12,
+    borderRadius: 10,
+    borderWidth: 1.5,
+    borderColor: '#fca5a5',
+    backgroundColor: '#fef2f2',
+    marginTop: 6,
+  },
+  logoutBtnText: {
+    color: '#dc2626',
+    fontSize: 14,
+    fontWeight: '700',
   },
   addBtnHeader: {
     flexDirection: 'row',

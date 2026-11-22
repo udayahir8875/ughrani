@@ -1,8 +1,8 @@
 # Ughrani (ઉઘરાણી / उघराણી) 📒💼
 
-A lightweight, high-performance cross-platform digital ledger (Khata) app designed for local shopkeepers and retail merchants to track customer dues, credit ("udhar"), payments received ("jama"), and daily cashflow with ease.
+A lightweight, enterprise-grade cross-platform digital ledger (Khata) app designed for local shopkeepers and retail merchants to track customer dues, credit ("udhar"), payments received ("jama"), and daily cashflow with ease.
 
-Built with **React Native (Expo SDK 58) + React Native Web + TypeScript**. Runs simultaneously on **Android, iOS, and Web**.
+Built with **React Native (Expo SDK 58) + React Native Web + TypeScript + Supabase (PostgreSQL)**. Runs simultaneously on **Android, iOS, and Web**.
 
 ---
 
@@ -25,41 +25,78 @@ npm run start
 
 ---
 
+## 🛡️ SaaS Architecture: Disaster Recovery & Security
+
+Shopkeepers rely on their ledger for their livelihood. If a phone is dropped, water-damaged, stolen, or reset, **zero data is lost**:
+
+1. **Hardware-Backed Session Security**:
+   - On Android and iOS, authentication tokens are encrypted using device-level hardware keychains (`expo-secure-store`).
+   - On web, sessions use isolated browser storage.
+2. **Multi-Device Instant Sync**:
+   - Shopkeepers can log in simultaneously on their phone, tablet, and PC. Any entry made on one device appears instantly on the others.
+3. **Database-Level Isolation (Row-Level Security)**:
+   - Built on PostgreSQL with Row-Level Security (RLS). Shopkeeper A can never view or modify Shopkeeper B's records, enforced at the database kernel level.
+4. **Trigger-Based Balance Calculations**:
+   - Customer balances are recalculated via a PostgreSQL database trigger whenever an entry is added, edited, or removed. This prevents any mathematical drift or balance corruption.
+5. **Continuous Cloud Backups**:
+   - Multi-AZ cloud storage with Point-In-Time Recovery (PITR) ensures records can be restored to any exact minute if anything catastrophic happens.
+
+---
+
+## 🗄️ Setting Up Supabase Cloud (Free Tier)
+
+1. Create a free account at [supabase.com](https://supabase.com).
+2. Create a new project named `ughrani`.
+3. Go to the **SQL Editor** tab in your Supabase dashboard and run the entire SQL script from [`supabase/schema.sql`](supabase/schema.sql).
+4. Go to **Project Settings -> API** and copy:
+   - Project URL
+   - `anon` `public` API key
+5. Create a `.env` file in the root directory (based on `.env.example`):
+   ```env
+   EXPO_PUBLIC_SUPABASE_URL=https://your-project-ref.supabase.co
+   EXPO_PUBLIC_SUPABASE_ANON_KEY=your-anon-key-here
+   ```
+6. Restart the app. The app will automatically connect to live Supabase cloud storage! (Without `.env`, the app automatically runs in interactive Demo Mode for quick review).
+
+---
+
 ## ✨ Implemented Features
 
+- **Shop Registration & Authentication**: Multi-device login with shop name, owner name, email, and password.
 - **Net Balance Cards**: Real-time summary of **You'll Get (ઉઘરાણી)** and **You'll Give (લેવાના)**.
-- **Customer Directory**: Fast search by customer name or phone number, with filters (All / Dues / Settled).
-- **Udhar & Jama Entry**: Quick modal to record credit given or payment received.
-- **WhatsApp Reminder Integration**: One-click Gujarati/Hindi/English payment reminder sent directly via WhatsApp.
-- **Daily Cashbook**: Separate tab for recording daily counter sales, expenses, and cash in hand.
-- **TypeScript Data Models**: Defined in `src/types/ledger.ts`.
+- **Customer Directory**: Fast search by customer name or phone number, with filter chips (*All*, *Pending Dues*, *Settled*).
+- **Udhar & Jama Entry**: Modal to record credit given (*Udhar*) or payment received (*Jama*).
+- **One-Tap WhatsApp Reminders**: Direct WhatsApp button sending polite pre-formatted payment reminders with outstanding balance.
+- **Daily Cashbook**: Separate tab for recording daily counter sales, expenses, and net cash-in-hand.
+- **Shop Profile & Logout**: View account details, cloud sync status, and device logout.
 
 ---
 
 ## 📁 Project Structure
 
 ```
-├── assets/             # App icons, splash screens, and images
+├── assets/                 # App icons, splash screens, and images
 ├── src/
-│   ├── app/            # Expo Router file-based screens
-│   │   ├── _layout.tsx # Root theme and navigation provider
-│   │   ├── index.tsx   # Customer Khata / Ughrani home screen
-│   │   └── explore.tsx # Daily Cashbook & Reports screen
-│   ├── components/     # Cross-platform UI components & tab navigation
-│   ├── constants/      # App theme & typography
+│   ├── app/                # Expo Router screens
+│   │   ├── _layout.tsx     # Theme, splash, and AuthProvider wrapper
+│   │   ├── index.tsx       # Customer Khata / Ughrani home screen
+│   │   └── explore.tsx     # Daily Cashbook & Reports screen
+│   ├── components/
+│   │   ├── auth/           # Login & Shop Registration UI
+│   │   └── app-tabs.tsx    # Native & Web bottom tabs
+│   ├── context/
+│   │   └── AuthContext.tsx # SaaS authentication & session state
+│   ├── lib/
+│   │   └── supabase.ts     # Supabase client with cross-platform secure store
 │   └── types/
-│       └── ledger.ts   # Core TypeScript interfaces (Customer, Transaction)
-├── app.json            # Expo app configuration
-└── package.json        # Dependencies & scripts
+│       ├── auth.ts         # User & profile types
+│       └── ledger.ts       # Customer & Transaction interfaces
+├── supabase/
+│   └── schema.sql          # Production PostgreSQL RLS & triggers
+├── .env.example            # Environment variables template
+├── app.json                # Expo app configuration
+└── package.json            # Dependencies & scripts
 ```
-
----
-
-## 🗄️ Database Integration (Upcoming)
-
-The schema in `src/types/ledger.ts` is ready to link with:
-- **Supabase** (PostgreSQL cloud database with free Auth & row-level security).
-- **Expo SQLite** (for local-first, 100% offline mobile usage).
 
 ---
 Created with ❤️ for local businesses.

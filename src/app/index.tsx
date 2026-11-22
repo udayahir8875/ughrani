@@ -16,9 +16,11 @@ import { Ionicons } from '@expo/vector-icons';
 import { Customer, Transaction } from '@/types/ledger';
 import { useAuth } from '@/context/AuthContext';
 import { supabase } from '@/lib/supabase';
+import { useRouter } from 'expo-router';
 import UghraniLogo from '@/components/ui/UghraniLogo';
 
 export default function HomeScreen() {
+  const router = useRouter();
   const { user, signOut, isConfigured } = useAuth();
   const [customers, setCustomers] = useState<Customer[]>([]);
   const [searchQuery, setSearchQuery] = useState('');
@@ -218,6 +220,11 @@ export default function HomeScreen() {
         </TouchableOpacity>
 
         <View style={styles.headerRightActions}>
+          <TouchableOpacity
+            style={styles.profileBtnHeader}
+            onPress={() => router.push('/settings')}>
+            <Ionicons name="settings-outline" size={17} color="#78350f" />
+          </TouchableOpacity>
           <TouchableOpacity
             style={styles.profileBtnHeader}
             onPress={() => setShowProfileModal(true)}>

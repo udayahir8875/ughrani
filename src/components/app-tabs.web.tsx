@@ -30,6 +30,9 @@ export default function AppTabs() {
           <TabTrigger name="admin" href="/admin" asChild>
             <TabButton>👑 Admin Console</TabButton>
           </TabTrigger>
+          <TabTrigger name="settings" href="/settings" asChild>
+            <TabButton>⚙️ Settings & Backup</TabButton>
+          </TabTrigger>
         </CustomTabList>
       </TabList>
     </Tabs>
